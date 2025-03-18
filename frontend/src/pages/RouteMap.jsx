@@ -180,7 +180,7 @@ const AISection = ({ aiValidation, navigate }) => {
   return (
     <div
       className="space-y-3 mt-4 cursor-pointer hover:bg-slate-750 transition-colors p-2 rounded-md"
-      onClick={() => aiValidation && navigate('/ai-details', { state: { aiValidation } })}
+      onClick={() => aiValidation && navigate('/aianalysis', { state: { aiValidation } })}
     >
       <h3 className="text-white font-semibold mb-2 flex items-center">
         <svg className="h-5 w-5 text-blue-400 mr-2" fill="none" viewBox="0 0 24 24" stroke="currentColor">
@@ -1102,10 +1102,10 @@ const RouteMap = () => {
                   <p><span className="text-gray-400">Timestamp:</span> {finalReport.timestamp}</p>
                 </div>
                 <div className="space-x-2 mt-4">
-                  <button className="bg-blue-600 hover:bg-blue-700 text-white py-3 px-2 rounded-md font-medium" onClick={() => navigate('/ai-details', { state: { aiValidation } })}>
+                  <button className="bg-blue-600 hover:bg-blue-700 text-white py-3 px-2 rounded-md font-medium" onClick={() => navigate('/aianalysis', { state: { aiValidation } })}>
                     AI Analysis
                   </button>
-                  <button className="bg-blue-600 hover:bg-blue-700 text-white py-3 px-2 rounded-md font-medium" onClick={() => navigate('/wallet-details', { state: { blockchainData } })}>
+                  <button className="bg-blue-600 hover:bg-blue-700 text-white py-3 px-2 rounded-md font-medium" onClick={() => navigate('/blockchainanalysis', { state: { blockchainData } })}>
                     Blockchain Analysis
                   </button>
                 </div>
