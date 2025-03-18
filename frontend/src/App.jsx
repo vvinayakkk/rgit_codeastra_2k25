@@ -11,6 +11,7 @@ import Analytics from './pages/producer/analytics'
 import Products from './pages/producer/products'
 import Settings from './pages/producer/settings'
 import Shipments from './pages/producer/shipments'
+import RouteMap from './pages/RouteMap'
 
 function App() {
   const [count, setCount] = useState(0)
@@ -26,6 +27,7 @@ function App() {
         <Route path='/Products' element={<Products />} />
         <Route path='/Settings' element={<Settings />} />
         <Route path='/Shipments' element={<Shipments />} />
+        <Route path='/map' element={<RouteMap/>}/>
       </Routes>
     </>
   )
