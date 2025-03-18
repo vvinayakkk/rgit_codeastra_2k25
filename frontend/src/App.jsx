@@ -11,6 +11,12 @@ import Analytics from './pages/producer/analytics'
 import Products from './pages/producer/products'
 import Settings from './pages/producer/settings'
 import Shipments from './pages/producer/shipments'
+import RetailerDashboard from './pages/Retailer'
+import RouteMap from './pages/RouteMap'
+import AIAnalysisDashboard from './pages/AiAnalysis'
+import BlockchainValidationDashboard from './pages/BlockchainAnalysis'
+import ConsumerDashboard from './pages/ConsumerDashboard'
+import PharmaDashboard from './pages/ConsumerDashboard'
 
 function App() {
   const [count, setCount] = useState(0)
@@ -26,6 +32,11 @@ function App() {
         <Route path='/Products' element={<Products />} />
         <Route path='/Settings' element={<Settings />} />
         <Route path='/Shipments' element={<Shipments />} />
+        <Route path='/Retailers' element={<RetailerDashboard />} />
+        <Route path='/Maps' element={<RouteMap />} />
+        <Route path='/aianalysis' element={<AIAnalysisDashboard />} />
+        <Route path='/blockchainanalysis' element={<BlockchainValidationDashboard />} />
+        <Route path='/consumer' element={<PharmaDashboard />} />
       </Routes>
     </>
   )
