@@ -14,6 +14,8 @@ Below is a comprehensive GitHub README for your project, incorporating all the d
 # Blockchain-Based Supply Chain with AI Fraud Detection
 
 Welcome to the future of supply chain management! This project delivers a **blockchain-powered supply chain system** integrated with **AI-driven fraud detection** and **optimized logistics**, ensuring transparency, authenticity, and efficiency for businesses worldwide. Built for producers, manufacturers, and retailers, our platform tracks products end-to-end while leveraging cutting-edge AI and blockchain to eliminate fraud and streamline operations.
+![diagram-export-3-18-2025-7_19_06-PM](https://github.com/user-attachments/assets/761c87fc-3984-4dab-b31d-f95adad146de)
+
 
 ---
 
