@@ -1,87 +1,96 @@
+
+import React, { useState } from "react";
 import { useNavigate } from "react-router-dom";
-import { useState } from "react";
-import { motion } from "framer-motion";
-import { MdSecurity } from "react-icons/md";
+import { Building2, User, Users } from "lucide-react";
 
-function LoginPage() {
+function Login() {
+  const [email, setEmail] = useState("");
+  const [password, setPassword] = useState("");
+  const [userType, setUserType] = useState("");
   const navigate = useNavigate();
-  const [username, setUsername] = useState('');
-  const [password, setPassword] = useState('');
 
-  function handleSubmit(e) {
+  const handleSubmit = async (e) => {
     e.preventDefault();
-    // Add validation logic here if needed
-    if (username && password) {
-      navigate('/dashboard');
+
+    const user = {
+        email,
+        password,
+        userType
     }
-  }
+    localStorage.setItem("user", user);
+    if(userType === "energyProducer"){
+        navigate('/producer');
+    }else if(userType === "retailer"){
+        navigate('/retailer');
+    }else if(userType === "consumer"){
+        navigate('/consumer');
+    }else{
+
+    }
+  };
 
   return (
-    <div className="min-h-screen flex items-center justify-center">
-      <motion.div
-        initial={{ opacity: 0, y: 20 }}
-        animate={{ opacity: 1, y: 0 }}
-        transition={{ duration: 0.5 }}
-        className="bg-white p-8 rounded-lg shadow-lg max-w-md w-full"
-      >
-        <div className="flex justify-center mb-6">
-          <div className="rounded-full bg-blue-500 p-3">
-            <MdSecurity size={40} className="text-white" />
-          </div>
+    <div className="min-h-screen bg-gradient-to-br from-blue-900 to-black flex items-center justify-center p-4">
+      <div className="bg-gray-900 rounded-2xl shadow-xl p-8 w-full max-w-md border border-blue-500/20">
+        <h2 className="text-3xl font-bold text-blue-400 mb-6 text-center">Welcome</h2>
+
+        <div className="grid grid-cols-3 gap-3 mb-8">
+          {[
+            { type: "energyProducer", icon: Building2, label: "Producer" },
+            { type: "retailer", icon: User, label: "Retailer" },
+            { type: "consumer", icon: Users, label: "Consumer" }
+          ].map(({ type, icon: Icon, label }) => (
+            <button
+              key={type}
+              onClick={() => setUserType(type)}
+              className={`p-4 rounded-xl flex flex-col items-center gap-2 transition-all ${
+                userType === type 
+                  ? 'bg-blue-600 text-white shadow-lg scale-105' 
+                  : 'bg-gray-800 text-gray-300 hover:bg-gray-700'
+              }`}
+            >
+              <Icon size={24} />
+              <span className="text-sm font-medium">{label}</span>
+            </button>
+          ))}
         </div>
-        <h2 className="text-2xl font-bold text-center mb-6">SecureVision AI</h2>
-        <form onSubmit={handleSubmit}>
-          <div className="mb-4">
-            <label className="block text-gray-700 text-sm font-bold mb-2" htmlFor="username">
-              Username
-            </label>
+
+        <form onSubmit={handleSubmit} className="space-y-4">
+          <div>
+            <label className="block text-sm font-medium mb-1 text-blue-300">Email address</label>
             <input
-              className="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:ring-2 focus:ring-blue-500"
-              id="username"
-              type="text"
-              placeholder="Enter your username"
-              value={username}
-              onChange={(e) => setUsername(e.target.value)}
+              type="email"
+              className="w-full p-3 border rounded-lg bg-gray-800 border-gray-700 text-white focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+              placeholder="Enter email"
+              value={email}
+              onChange={(e) => setEmail(e.target.value)}
+              required
             />
           </div>
-          <div className="mb-6">
-            <label className="block text-gray-700 text-sm font-bold mb-2" htmlFor="password">
-              Password
-            </label>
+
+          <div>
+            <label className="block text-sm font-medium mb-1 text-blue-300">Password</label>
             <input
-              className="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:ring-2 focus:ring-blue-500"
-              id="password"
               type="password"
-              placeholder="Enter your password"
+              className="w-full p-3 border rounded-lg bg-gray-800 border-gray-700 text-white focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+              placeholder="Enter password"
               value={password}
               onChange={(e) => setPassword(e.target.value)}
+              required
             />
           </div>
-          <div className="flex items-center justify-between mb-4">
-            <div className="flex items-center">
-              <input
-                id="remember-me"
-                type="checkbox"
-                className="h-4 w-4 text-blue-600 focus:ring-blue-500 border-gray-300 rounded"
-              />
-              <label htmlFor="remember-me" className="ml-2 block text-sm text-gray-700">
-                Remember me
-              </label>
-            </div>
-            <a href="#" className="text-sm text-blue-600 hover:underline">
-              Forgot password?
-            </a>
-          </div>
+          
           <button
             type="submit"
-            className="w-full bg-blue-500 hover:bg-blue-600 text-white font-bold py-3 px-4 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 transition-colors duration-200"
+            className="w-full py-3 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors"
           >
             Sign In
           </button>
+
         </form>
-      </motion.div>
+      </div>
     </div>
   );
 }
 
-export default LoginPage;
+export default Login;
