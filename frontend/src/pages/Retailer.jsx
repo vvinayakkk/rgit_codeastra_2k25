@@ -49,6 +49,145 @@ const RetailerDashboard = () => {
   const [chartData, setChartData] = useState({});
   const [sidebarOpen, setSidebarOpen] = useState(true);
 
+  // Mock pharmaceutical products from producers
+  const mockProducts = [
+    { 
+      id: "MED-001",
+      name: "Amoxicillin 500mg",
+      batchNumber: "AMX-2025-032",
+      producer: "MediPharm Ltd.",
+      manufacturingDate: "2025-01-15",
+      expiryDate: "2027-01-14",
+      price: 4850,
+      quantity: 5000,
+      packSize: "10x10 tablets",
+      temperature: "20-25°C",
+      certifications: ["GMP", "WHO-GMP", "ISO 9001"],
+      verified: true
+    },
+    { 
+      id: "MED-002",
+      name: "Azithromycin 250mg",
+      batchNumber: "AZT-2025-087",
+      producer: "BioGeneric Pharma",
+      manufacturingDate: "2025-02-03",
+      expiryDate: "2027-02-02",
+      price: 5200,
+      quantity: 3000,
+      packSize: "6x10 tablets",
+      temperature: "15-30°C",
+      certifications: ["GMP", "ISO 9001"],
+      verified: true
+    },
+    { 
+      id: "MED-003",
+      name: "Montelukast 10mg",
+      batchNumber: "MTL-2025-109",
+      producer: "LifeScience Pharmaceuticals",
+      manufacturingDate: "2025-02-18",
+      expiryDate: "2026-08-17",
+      price: 6430,
+      quantity: 2000,
+      packSize: "3x10 tablets",
+      temperature: "20-25°C",
+      certifications: ["GMP", "ISO 13485"],
+      verified: true
+    },
+    { 
+      id: "MED-004",
+      name: "Paracetamol 650mg",
+      batchNumber: "PCM-2025-214",
+      producer: "MediPharm Ltd.",
+      manufacturingDate: "2025-03-05",
+      expiryDate: "2028-03-04",
+      price: 1250,
+      quantity: 10000,
+      packSize: "15x10 tablets",
+      temperature: "20-25°C",
+      certifications: ["GMP", "WHO-GMP"],
+      verified: true
+    },
+    { 
+      id: "MED-005",
+      name: "Insulin Glargine 100IU",
+      batchNumber: "INS-2025-063",
+      producer: "DiabeCare Biologics",
+      manufacturingDate: "2025-01-25",
+      expiryDate: "2026-01-24",
+      price: 12800,
+      quantity: 500,
+      packSize: "5 vials",
+      temperature: "2-8°C",
+      certifications: ["GMP", "ISO 9001", "ISO 13485"],
+      verified: true
+    }
+  ];
+
+  // Mock transaction history
+  const mockTransactions = [
+    { 
+      id: "TXN-2025-001",
+      productId: "MED-001",
+      productName: "Amoxicillin 500mg",
+      batchNumber: "AMX-2025-032",
+      quantity: 1000,
+      totalAmount: 970000,
+      timestamp: "2025-03-10T09:23:18",
+      status: "completed",
+      blockchainHash: "0x7f9e8d7c6b5a4c3d2e1f0a9b8c7d6e5f4a3b2c1d",
+      fraudDetected: false
+    },
+    { 
+      id: "TXN-2025-002",
+      productId: "MED-003",
+      productName: "Montelukast 10mg",
+      batchNumber: "MTL-2025-109",
+      quantity: 500,
+      totalAmount: 1607500,
+      timestamp: "2025-03-12T14:05:42",
+      status: "completed",
+      blockchainHash: "0x1a2b3c4d5e6f7g8h9i0j1k2l3m4n5o6p7q8r9s",
+      fraudDetected: false
+    },
+    { 
+      id: "TXN-2025-003",
+      productId: "MED-005",
+      productName: "Insulin Glargine 100IU",
+      batchNumber: "INS-2025-063",
+      quantity: 100,
+      totalAmount: 1280000,
+      timestamp: "2025-03-14T11:37:09",
+      status: "completed",
+      blockchainHash: "0x2b3c4d5e6f7g8h9i0j1k2l3m4n5o6p7q8r9s0t1u",
+      fraudDetected: false
+    },
+    { 
+      id: "TXN-2025-004",
+      productId: "MED-002",
+      productName: "Azithromycin 250mg",
+      batchNumber: "AZT-2025-087",
+      quantity: 800,
+      totalAmount: 4160000,
+      timestamp: "2025-03-15T16:22:31",
+      status: "flagged",
+      blockchainHash: "0x3c4d5e6f7g8h9i0j1k2l3m4n5o6p7q8r9s0t1u2v",
+      fraudDetected: true,
+      fraudReason: "Suspicious transaction pattern detected"
+    },
+    { 
+      id: "TXN-2025-005",
+      productId: "MED-004",
+      productName: "Paracetamol 650mg",
+      batchNumber: "PCM-2025-214",
+      quantity: 2000,
+      totalAmount: 2500000,
+      timestamp: "2025-03-17T10:12:45",
+      status: "completed",
+      blockchainHash: "0x4d5e6f7g8h9i0j1k2l3m4n5o6p7q8r9s0t1u2v3w",
+      fraudDetected: false
+    }
+  ];
+
   // Mock notifications
   const mockNotifications = [
     {
@@ -180,6 +319,104 @@ const RetailerDashboard = () => {
         ]
       }
     });
+  };
+
+  // Filter products based on search and filters
+  const filteredProducts = products.filter(product => {
+    return (
+      product.name.toLowerCase().includes(searchTerm.toLowerCase()) &&
+      (filters.producer ? product.producer === filters.producer : true) &&
+      (filters.certification ? product.certifications.includes(filters.certification) : true) &&
+      (filters.expired ? new Date(product.expiryDate) < new Date() : true)
+    );
+  });
+
+  // Buy product function
+  const buyProduct = (product) => {
+    const quantity = prompt(`Enter quantity to purchase (Available: ${product.quantity}):`, "100");
+    if (!quantity || isNaN(quantity) || parseInt(quantity) <= 0 || parseInt(quantity) > product.quantity) {
+      alert("Please enter a valid quantity!");
+      return;
+    }
+
+    const qtyNum = parseInt(quantity);
+    const totalAmount = qtyNum * product.price;
+    
+    // Generate transaction ID
+    const txnId = `TXN-2025-${Math.floor(1000 + Math.random() * 9000)}`;
+    
+    // Simulate blockchain hash
+    const blockchainHash = `0x${Array.from({length: 40}, () => Math.floor(Math.random() * 16).toString(16)).join('')}`;
+    
+    // Run "AI fraud detection" - simulate by flagging certain patterns
+    const isFraudulent = Math.random() < 0.15 || 
+                         (qtyNum > product.quantity * 0.5) || 
+                         (product.name.includes("insulin") && qtyNum > 100);
+    
+    const newTransaction = {
+      id: txnId,
+      productId: product.id,
+      productName: product.name,
+      batchNumber: product.batchNumber,
+      quantity: qtyNum,
+      totalAmount: totalAmount,
+      timestamp: new Date().toISOString(),
+      status: isFraudulent ? "flagged" : "completed",
+      blockchainHash: blockchainHash,
+      fraudDetected: isFraudulent,
+      fraudReason: isFraudulent ? "Suspicious transaction pattern detected" : null
+    };
+    
+    // Add transaction
+    setTransactions(prevTransactions => [newTransaction, ...prevTransactions]);
+    
+    // Update product quantity
+    setProducts(prevProducts => 
+      prevProducts.map(p => 
+        p.id === product.id ? {...p, quantity: p.quantity - qtyNum} : p
+      )
+    );
+    
+    // Add fraud alert if fraud detected
+    if (isFraudulent) {
+      const newFraudAlert = {
+        id: `FRAUD-${Math.floor(1000 + Math.random() * 9000)}`,
+        transactionId: txnId,
+        severity: "high",
+        details: "Unusual purchase pattern detected by AI system",
+        timestamp: new Date().toISOString(),
+        resolved: false
+      };
+      
+      setFraudAlerts(prev => [newFraudAlert, ...prev]);
+      
+      // Add notification
+      const newNotification = {
+        id: `NOTIF-${Math.floor(1000 + Math.random() * 9000)}`,
+        type: "fraud",
+        message: `Potential fraud detected in transaction ${txnId}`,
+        timestamp: new Date().toISOString(),
+        read: false
+      };
+      
+      setNotifications(prev => [newNotification, ...prev]);
+      
+      // Show alert
+      alert("⚠️ FRAUD ALERT: This transaction has been flagged as potentially fraudulent and requires review!");
+    } else {
+      // Success notification
+      const newNotification = {
+        id: `NOTIF-${Math.floor(1000 + Math.random() * 9000)}`,
+        type: "transaction",
+        message: `Transaction ${txnId} completed successfully`,
+        timestamp: new Date().toISOString(),
+        read: false
+      };
+      
+      setNotifications(prev => [newNotification, ...prev]);
+      
+      alert(`Transaction completed successfully. Transaction ID: ${txnId}`);
+    }
   };
 
   // Format currency
@@ -334,28 +571,43 @@ const RetailerDashboard = () => {
               </tr>
             </thead>
             <tbody className="bg-white dark:bg-gray-800 divide-y divide-gray-200 dark:divide-gray-700">
-              {Array.isArray(transactions) && transactions.length > 0 ? (
-                transactions.slice(0, 5).map((transaction) => (
-                  <tr key={transaction._id} className={transaction.fraudDetected ? "bg-red-50 dark:bg-red-900 dark:bg-opacity-20" : ""}>
-                    <td className="px-3 py-4 whitespace-nowrap text-sm font-medium text-gray-900 dark:text-white">{transaction.transactionId}</td>
-                    <td className="px-3 py-4 whitespace-nowrap text-sm text-gray-500 dark:text-gray-300">{transaction.supplyChainNodeType}</td>
-                    <td className="px-3 py-4 whitespace-nowrap text-sm text-gray-500 dark:text-gray-300">{transaction.transactionVolume}</td>
-                    <td className="px-3 py-4 whitespace-nowrap text-sm text-gray-500 dark:text-gray-300">{formatCurrency(transaction.transactionValue)}</td>
-                    <td className="px-3 py-4 whitespace-nowrap text-sm text-gray-500 dark:text-gray-300">{formatDate(new Date().toISOString())}</td>
-                    <td className="px-3 py-4 whitespace-nowrap text-sm">
-                      {renderStatusBadge('completed', false)}
-                    </td>
-                  </tr>
-                ))
-              ) : (
-                <tr>
-                  <td colSpan="6" className="px-3 py-4 text-center text-gray-500 dark:text-gray-400">
-                    No transactions available
+              {transactions.slice(0, 5).map((transaction) => (
+                <tr key={transaction.id} className={transaction.fraudDetected ? "bg-red-50 dark:bg-red-900 dark:bg-opacity-20" : ""}>
+                  <td className="px-3 py-4 whitespace-nowrap text-sm font-medium text-gray-900 dark:text-white">{transaction.id}</td>
+                  <td className="px-3 py-4 whitespace-nowrap text-sm text-gray-500 dark:text-gray-300">{transaction.productName}</td>
+                  <td className="px-3 py-4 whitespace-nowrap text-sm text-gray-500 dark:text-gray-300">{transaction.quantity}</td>
+                  <td className="px-3 py-4 whitespace-nowrap text-sm text-gray-500 dark:text-gray-300">{formatCurrency(transaction.totalAmount)}</td>
+                  <td className="px-3 py-4 whitespace-nowrap text-sm text-gray-500 dark:text-gray-300">{formatDate(transaction.timestamp)}</td>
+                  <td className="px-3 py-4 whitespace-nowrap text-sm">
+                    {renderStatusBadge(transaction.status, transaction.fraudDetected)}
                   </td>
                 </tr>
-              )}
+              ))}
             </tbody>
           </table>
+        </div>
+      </div>
+
+      {/* Notifications & Alerts */}
+      <div className="bg-white dark:bg-gray-800 rounded-lg shadow-lg p-6">
+        <h2 className="text-lg font-semibold mb-4 flex items-center">
+          <Bell className="w-5 h-5 mr-2 text-blue-600" />
+          Latest Notifications
+        </h2>
+        <div className="space-y-4">
+          {notifications.slice(0, 5).map((notification) => (
+            <div key={notification.id} className={`p-3 rounded-lg border ${notification.read ? 'border-gray-200 dark:border-gray-700' : 'border-blue-200 dark:border-blue-700 bg-blue-50 dark:bg-blue-900 dark:bg-opacity-20'}`}>
+              <div className="flex items-start">
+                <div className="flex-shrink-0">
+                  {renderNotificationIcon(notification.type)}
+                </div>
+                <div className="ml-3 flex-1">
+                  <p className="text-sm font-medium text-gray-900 dark:text-white">{notification.message}</p>
+                  <p className="mt-1 text-xs text-gray-500 dark:text-gray-400">{formatDate(notification.timestamp)}</p>
+                </div>
+              </div>
+            </div>
+          ))}
         </div>
       </div>
     </div>
@@ -413,7 +665,7 @@ const RetailerDashboard = () => {
             </tr>
           </thead>
           <tbody className="bg-white dark:bg-gray-800 divide-y divide-gray-200 dark:divide-gray-700">
-            {products.map((product) => (
+            {filteredProducts.map((product) => (
               <tr key={product.id}>
                 <td className="px-4 py-4 whitespace-nowrap">
                   <div className="flex items-center">
@@ -429,8 +681,8 @@ const RetailerDashboard = () => {
                 <td className="px-4 py-4 whitespace-nowrap">
                   <div className="text-sm text-gray-900 dark:text-white">{product.producer}</div>
                   <div className="flex items-center mt-1">
-                    {Array.isArray(product.certifications) && product.certifications.map((cert, index) => (
-                      <span key={`${product.id}-cert-${index}`} className="mr-1 inline-flex items-center px-2 py-0.5 rounded text-xs font-medium bg-green-100 text-green-800">
+                    {product.certifications.map((cert, index) => (
+                      <span key={index} className="mr-1 inline-flex items-center px-2 py-0.5 rounded text-xs font-medium bg-green-100 text-green-800">
                       {cert}
                     </span>
                   ))}
@@ -461,7 +713,7 @@ const RetailerDashboard = () => {
       </table>
     </div>
     
-    {products.length === 0 && (
+    {filteredProducts.length === 0 && (
       <div className="p-8 text-center">
         <Package className="h-12 w-12 mx-auto text-gray-400" />
         <h3 className="mt-2 text-sm font-medium text-gray-900 dark:text-white">No products found</h3>
@@ -486,56 +738,49 @@ const TransactionHistory = () => (
         <thead className="bg-gray-50 dark:bg-gray-700">
           <tr>
             <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">Transaction ID</th>
-            <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">To Address</th>
-            <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">Value</th>
-            <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">Volume</th>
-            <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">Node Type</th>
-            <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">Transport Method</th>
+            <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">Product</th>
+            <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">Batch</th>
+            <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">Quantity</th>
+            <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">Amount</th>
+            <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">Date</th>
+            <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">Status</th>
+            <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">Blockchain Hash</th>
           </tr>
         </thead>
         <tbody className="bg-white dark:bg-gray-800 divide-y divide-gray-200 dark:divide-gray-700">
-          {Array.isArray(transactions) && transactions.length > 0 ? (
-            transactions.map((transaction) => (
-              <tr key={transaction._id}>
-                <td className="px-4 py-4 whitespace-nowrap text-sm font-medium text-gray-900 dark:text-white">
-                  {transaction.transactionId}
-                </td>
-                <td className="px-4 py-4 whitespace-nowrap text-sm text-gray-500 dark:text-gray-300">
-                  <div className="flex items-center">
-                    <Hexagon className="h-4 w-4 mr-1 text-purple-500" />
-                    <span className="truncate w-16">{transaction.toAddress}</span>
-                    <button className="ml-1 text-blue-600 hover:text-blue-800" onClick={() => alert(`Full Address: ${transaction.toAddress}`)}>
-                      <Eye className="h-4 w-4" />
-                    </button>
-                  </div>
-                </td>
-                <td className="px-4 py-4 whitespace-nowrap text-sm text-gray-500 dark:text-gray-300">
-                  {transaction.transactionValue}
-                </td>
-                <td className="px-4 py-4 whitespace-nowrap text-sm text-gray-500 dark:text-gray-300">
-                  {transaction.transactionVolume}
-                </td>
-                <td className="px-4 py-4 whitespace-nowrap text-sm text-gray-500 dark:text-gray-300">
-                  {transaction.supplyChainNodeType}
-                </td>
-                <td className="px-4 py-4 whitespace-nowrap text-sm text-gray-500 dark:text-gray-300">
-                  <div className="flex items-center">
-                    <Truck className="h-4 w-4 mr-1 text-blue-500" />
-                    {transaction.transportationMethod}
-                  </div>
-                </td>
-              </tr>
-            ))
-          ) : (
-            <tr>
-              <td colSpan="6" className="px-4 py-4 text-center text-gray-500 dark:text-gray-400">
-                No transactions available
+          {transactions.map((transaction) => (
+            <tr key={transaction.id} className={transaction.fraudDetected ? "bg-red-50 dark:bg-red-900 dark:bg-opacity-20" : ""}>
+              <td className="px-4 py-4 whitespace-nowrap text-sm font-medium text-gray-900 dark:text-white">{transaction.id}</td>
+              <td className="px-4 py-4 whitespace-nowrap text-sm text-gray-500 dark:text-gray-300">{transaction.productName}</td>
+              <td className="px-4 py-4 whitespace-nowrap text-sm text-gray-500 dark:text-gray-300">{transaction.batchNumber}</td>
+              <td className="px-4 py-4 whitespace-nowrap text-sm text-gray-500 dark:text-gray-300">{transaction.quantity}</td>
+              <td className="px-4 py-4 whitespace-nowrap text-sm text-gray-500 dark:text-gray-300">{formatCurrency(transaction.totalAmount)}</td>
+              <td className="px-4 py-4 whitespace-nowrap text-sm text-gray-500 dark:text-gray-300">{formatDate(transaction.timestamp)}</td>
+              <td className="px-4 py-4 whitespace-nowrap text-sm">
+                {renderStatusBadge(transaction.status, transaction.fraudDetected)}
+              </td>
+              <td className="px-4 py-4 whitespace-nowrap text-sm text-gray-500 dark:text-gray-300">
+                <div className="flex items-center">
+                  <Hexagon className="h-4 w-4 mr-1 text-purple-500" />
+                  <span className="truncate w-16">{transaction.blockchainHash}</span>
+                  <button className="ml-1 text-blue-600 hover:text-blue-800" onClick={() => alert(`Full Hash: ${transaction.blockchainHash}`)}>
+                    <Eye className="h-4 w-4" />
+                  </button>
+                </div>
               </td>
             </tr>
-          )}
+          ))}
         </tbody>
       </table>
     </div>
+    
+    {transactions.length === 0 && (
+      <div className="p-8 text-center">
+        <Database className="h-12 w-12 mx-auto text-gray-400" />
+        <h3 className="mt-2 text-sm font-medium text-gray-900 dark:text-white">No transactions yet</h3>
+        <p className="mt-1 text-sm text-gray-500 dark:text-gray-400">Your transaction history will appear here.</p>
+      </div>
+    )}
   </div>
 );
 
@@ -784,7 +1029,6 @@ return (
     </div>
   </div>
 );
-}
+};
 
-
-export default RetailerDashboard
+export default RetailerDashboard;
