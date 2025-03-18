@@ -10,7 +10,11 @@ import ProducerDashboard from './pages/Producer'
 import Analytics from './pages/producer/analytics'
 import Products from './pages/producer/products'
 import Settings from './pages/producer/settings'
-import Shipments from './pages/producer/shipments'
+import Restrictions from './pages/Origin'
+import ComplianceFormPage from './pages/Compliance'
+import RouteMap from './pages/producer/ShipmentsSingle'
+import RetailerDashboard from './pages/Retailer'
+import Receive from './pages/Receive'
 
 function App() {
   const [count, setCount] = useState(0)
@@ -25,7 +29,11 @@ function App() {
         <Route path='/Analytics' element={<Analytics />} />
         <Route path='/Products' element={<Products />} />
         <Route path='/Settings' element={<Settings />} />
-        <Route path='/Shipments' element={<Shipments />} />
+        <Route path='/Shipments' element={<RouteMap />} />
+        <Route path='/origin' element={<Restrictions />} />
+        <Route path='/compliance' element={<ComplianceFormPage />} />
+        <Route path='/Retailer' element={<RetailerDashboard />} />
+        <Route path='/receiver' element={<Receive />} />
       </Routes>
     </>
   )
