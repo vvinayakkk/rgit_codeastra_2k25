@@ -12,15 +12,23 @@ import Products from './pages/producer/products'
 import Settings from './pages/producer/settings'
 import Restrictions from './pages/Origin'
 import ComplianceFormPage from './pages/Compliance'
+<<<<<<< Updated upstream
 import RetailerDashboard from './pages/Retailer'
+=======
+
+>>>>>>> Stashed changes
 import Receive from './pages/Receive'
 import RouteMap from './pages/RouteMap'
 import AIAnalysisDashboard from './pages/AiAnalysis'
 import BlockchainValidationDashboard from './pages/BlockchainAnalysis'
 import ConsumerDashboard from './pages/ConsumerDashboard'
 import PharmaDashboard from './pages/ConsumerDashboard'
+<<<<<<< Updated upstream
 import ItemImageCompliancePage from './pages/Reports'
 import FraudDetectionPage from './pages/Fraud'
+=======
+import ListingPage from './pages/Listing'
+>>>>>>> Stashed changes
 
 function App() {
   const [count, setCount] = useState(0)
@@ -46,8 +54,12 @@ function App() {
         <Route path='/aianalysis' element={<AIAnalysisDashboard />} />
         <Route path='/blockchainanalysis' element={<BlockchainValidationDashboard />} />
         <Route path='/consumer' element={<PharmaDashboard />} />
+<<<<<<< Updated upstream
         <Route path='/report' element={<ItemImageCompliancePage />} />
         <Route path='/overall-fraud' element={<FraudDetectionPage />} />
+=======
+        <Route path='/listing' element={<ListingPage />} />
+>>>>>>> Stashed changes
       </Routes>
     </>
   )
