@@ -54,12 +54,8 @@ function App() {
         <Route path='/aianalysis' element={<AIAnalysisDashboard />} />
         <Route path='/blockchainanalysis' element={<BlockchainValidationDashboard />} />
         <Route path='/consumer' element={<PharmaDashboard />} />
-<<<<<<< Updated upstream
         <Route path='/report' element={<ItemImageCompliancePage />} />
         <Route path='/overall-fraud' element={<FraudDetectionPage />} />
-=======
-        <Route path='/listing' element={<ListingPage />} />
->>>>>>> Stashed changes
       </Routes>
     </>
   )
