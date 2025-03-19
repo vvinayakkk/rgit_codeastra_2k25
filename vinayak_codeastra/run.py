@@ -4,9 +4,9 @@ import pandas as pd
 import numpy as np
 from datetime import datetime
 import traceback
-
+from flask_cors import CORS
 app = Flask(__name__)
-
+CORS(app)
 # Load the model
 print("Loading model...")
 model = joblib.load('blockchain_fraud_detection_model.pkl')
