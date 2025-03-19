@@ -12,15 +12,15 @@ import Products from './pages/producer/products'
 import Settings from './pages/producer/settings'
 import Restrictions from './pages/Origin'
 import ComplianceFormPage from './pages/Compliance'
-import RouteMap from './pages/producer/ShipmentsSingle'
 import RetailerDashboard from './pages/Retailer'
 import Receive from './pages/Receive'
 import RouteMap from './pages/RouteMap'
-import RetailerDashboard from './pages/Retailer'
 import AIAnalysisDashboard from './pages/AiAnalysis'
 import BlockchainValidationDashboard from './pages/BlockchainAnalysis'
 import ConsumerDashboard from './pages/ConsumerDashboard'
 import PharmaDashboard from './pages/ConsumerDashboard'
+import ItemImageCompliancePage from './pages/Reports'
+import FraudDetectionPage from './pages/Fraud'
 
 function App() {
   const [count, setCount] = useState(0)
@@ -36,8 +36,8 @@ function App() {
         <Route path='/Products' element={<Products />} />
         <Route path='/Settings' element={<Settings />} />
         <Route path='/Shipments' element={<RouteMap />} />
-        <Route path='/origin' element={<Restrictions />} />
-        <Route path='/compliance' element={<ComplianceFormPage />} />
+        <Route path='/origin-verification' element={<Restrictions />} />
+        <Route path='/compliance-check' element={<ComplianceFormPage />} />
         <Route path='/Retailer' element={<RetailerDashboard />} />
         <Route path='/receiver' element={<Receive />} />
         <Route path='/map' element={<RouteMap/>}/>
@@ -46,6 +46,8 @@ function App() {
         <Route path='/aianalysis' element={<AIAnalysisDashboard />} />
         <Route path='/blockchainanalysis' element={<BlockchainValidationDashboard />} />
         <Route path='/consumer' element={<PharmaDashboard />} />
+        <Route path='/report' element={<ItemImageCompliancePage />} />
+        <Route path='/overall-fraud' element={<FraudDetectionPage />} />
       </Routes>
     </>
   )

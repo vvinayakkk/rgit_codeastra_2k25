@@ -1,5 +1,3 @@
-
-
 import React, { useState, useEffect } from 'react';
 import axios from 'axios';
 import { Globe, AlertTriangle, Check, Package, MapPin, AlertCircle, FileText, Activity, X, ChevronDown, ChevronUp, Upload, Download, FileDown } from 'lucide-react';
@@ -57,27 +55,6 @@ const ComplianceChecker = () => {
   const [csvStats, setCsvStats] = useState(null);
   const [syntheticLoading, setSyntheticLoading] = useState(false); // Add a new loading state for synthetic check
   const [isLoading, setIsLoading] = useState(true);
-
-  useEffect(() => {
-    const checkMetaMask = async () => {
-        try {
-            if (!window.ethereum) {
-                console.error("MetaMask not installed");
-                return;
-            }
-            
-            const chainId = await window.ethereum.request({ method: 'eth_chainId' });
-            console.log("Connected to chain ID:", chainId);
-            
-            const accounts = await window.ethereum.request({ method: 'eth_accounts' });
-            console.log("Connected accounts:", accounts);
-        } catch (error) {
-            console.error("Error checking MetaMask:", error);
-        }
-    };
-    
-    checkMetaMask();
-}, []);
 
   useEffect(() => {
     const fetchData = async () => {
@@ -1384,4 +1361,3 @@ const ComplianceChecker = () => {
 };
 
 export default ComplianceChecker;
-

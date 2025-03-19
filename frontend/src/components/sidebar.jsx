@@ -26,7 +26,6 @@ function Sidebar() {
           {[
             { name: "producer", icon: Layers },
             { name: "Products", icon: Package },
-            { name: "Shipments", icon: Truck },
             { name: "Analytics", icon: BarChart2 },
             { name: "Settings", icon: Settings },
           ].map(({ name, icon: Icon }) => (

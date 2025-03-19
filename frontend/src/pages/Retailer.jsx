@@ -31,8 +31,10 @@ import {
   LogOut,
   Settings,
   BarChart2,
-  Home
+  Home,
+  ShieldHalf
 } from 'lucide-react';
+import { useNavigate } from 'react-router-dom';
 
 const RetailerDashboard = () => {
   // State management
@@ -48,6 +50,7 @@ const RetailerDashboard = () => {
   const [fraudAlerts, setFraudAlerts] = useState([]);
   const [chartData, setChartData] = useState({});
   const [sidebarOpen, setSidebarOpen] = useState(true);
+  const navigate = useNavigate();
 
   // Mock pharmaceutical products from producers
   const mockProducts = [
@@ -402,7 +405,7 @@ const RetailerDashboard = () => {
       setNotifications(prev => [newNotification, ...prev]);
       
       // Show alert
-      alert("⚠️ FRAUD ALERT: This transaction has been flagged as potentially fraudulent and requires review!");
+      alert("⚠ FRAUD ALERT: This transaction has been flagged as potentially fraudulent and requires review!");
     } else {
       // Success notification
       const newNotification = {
@@ -419,8 +422,9 @@ const RetailerDashboard = () => {
     }
   };
 
-  // Format currency
+  // Format currency - update to handle undefined/null values
   const formatCurrency = (amount) => {
+    if (!amount && amount !== 0) return '₹0';
     return new Intl.NumberFormat('en-IN', {
       style: 'currency',
       currency: 'INR',
@@ -428,9 +432,11 @@ const RetailerDashboard = () => {
     }).format(amount);
   };
 
-  // Format date
+  // Format date - update to handle invalid dates
   const formatDate = (dateString) => {
+    if (!dateString) return 'N/A';
     const date = new Date(dateString);
+    if (isNaN(date.getTime())) return 'N/A';
     return date.toLocaleDateString('en-IN', {
       year: 'numeric',
       month: 'short',
@@ -498,120 +504,127 @@ const RetailerDashboard = () => {
     }
   };
 
-  // Dashboard component
-  const Dashboard = () => (
-    <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-      {/* Stats Row */}
-      <div className="bg-gradient-to-r from-blue-600 to-blue-800 rounded-lg shadow-lg p-6 text-white">
-        <div className="flex items-center justify-between">
-          <div>
-            <p className="text-sm font-medium uppercase">Total Inventory Value</p>
-            <p className="text-3xl font-bold mt-1">
-              {formatCurrency(products.reduce((sum, p) => sum + (p.price * p.quantity), 0))}
-            </p>
-          </div>
-          <div className="bg-white bg-opacity-20 rounded-full p-3">
-            <Package className="w-6 h-6" />
-          </div>
-        </div>
-        <div className="mt-4 text-sm flex items-center">
-          <TrendingUp className="w-4 h-4 mr-1" />
-          <span>+12.5% from last month</span>
-        </div>
-      </div>
-      
-      <div className="bg-gradient-to-r from-purple-600 to-purple-800 rounded-lg shadow-lg p-6 text-white">
-        <div className="flex items-center justify-between">
-          <div>
-            <p className="text-sm font-medium uppercase">Transactions (30d)</p>
-            <p className="text-3xl font-bold mt-1">{transactions.length}</p>
-          </div>
-          <div className="bg-white bg-opacity-20 rounded-full p-3">
-            <ShoppingCart className="w-6 h-6" />
-          </div>
-        </div>
-        <div className="mt-4 text-sm flex items-center">
-          <TrendingUp className="w-4 h-4 mr-1" />
-          <span>+8.2% from last month</span>
-        </div>
-      </div>
-      
-      <div className="bg-gradient-to-r from-red-600 to-red-800 rounded-lg shadow-lg p-6 text-white">
-        <div className="flex items-center justify-between">
-          <div>
-            <p className="text-sm font-medium uppercase">Fraud Alerts</p>
-            <p className="text-3xl font-bold mt-1">{fraudAlerts.length}</p>
-          </div>
-          <div className="bg-white bg-opacity-20 rounded-full p-3">
-            <AlertTriangle className="w-6 h-6" />
-          </div>
-        </div>
-        <div className="mt-4 text-sm flex items-center">
-          <AlertOctagon className="w-4 h-4 mr-1" />
-          <span>{fraudAlerts.filter(a => !a.resolved).length} unresolved alerts</span>
-        </div>
-      </div>
+  // Dashboard component - update total inventory calculation
+  const Dashboard = () => {
+    // Calculate total inventory value safely
+    const totalInventoryValue = products.reduce((sum, p) => {
+      const price = Number(p.price) || 0;
+      const quantity = Number(p.quantity) || 0;
+      return sum + (price * quantity);
+    }, 0);
 
-      {/* Recent Transactions */}
-      <div className="lg:col-span-2 bg-white dark:bg-gray-800 rounded-lg shadow-lg p-6">
-        <h2 className="text-lg font-semibold mb-4 flex items-center">
-          <Activity className="w-5 h-5 mr-2 text-blue-600" />
-          Recent Transactions
-        </h2>
-        <div className="overflow-x-auto">
-          <table className="min-w-full divide-y divide-gray-200 dark:divide-gray-700">
-            <thead className="bg-gray-50 dark:bg-gray-700">
-              <tr>
-                <th className="px-3 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">ID</th>
-                <th className="px-3 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">Product</th>
-                <th className="px-3 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">Quantity</th>
-                <th className="px-3 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">Amount</th>
-                <th className="px-3 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">Date</th>
-                <th className="px-3 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">Status</th>
-              </tr>
-            </thead>
-            <tbody className="bg-white dark:bg-gray-800 divide-y divide-gray-200 dark:divide-gray-700">
-              {transactions.slice(0, 5).map((transaction) => (
-                <tr key={transaction.id} className={transaction.fraudDetected ? "bg-red-50 dark:bg-red-900 dark:bg-opacity-20" : ""}>
-                  <td className="px-3 py-4 whitespace-nowrap text-sm font-medium text-gray-900 dark:text-white">{transaction.id}</td>
-                  <td className="px-3 py-4 whitespace-nowrap text-sm text-gray-500 dark:text-gray-300">{transaction.productName}</td>
-                  <td className="px-3 py-4 whitespace-nowrap text-sm text-gray-500 dark:text-gray-300">{transaction.quantity}</td>
-                  <td className="px-3 py-4 whitespace-nowrap text-sm text-gray-500 dark:text-gray-300">{formatCurrency(transaction.totalAmount)}</td>
-                  <td className="px-3 py-4 whitespace-nowrap text-sm text-gray-500 dark:text-gray-300">{formatDate(transaction.timestamp)}</td>
-                  <td className="px-3 py-4 whitespace-nowrap text-sm">
-                    {renderStatusBadge(transaction.status, transaction.fraudDetected)}
-                  </td>
+    return (
+      <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+        {/* Stats Row */}
+        <div className="bg-gradient-to-r from-blue-600 to-blue-800 rounded-lg shadow-lg p-6 text-white">
+          <div className="flex items-center justify-between">
+            <div>
+              <p className="text-sm font-medium uppercase">Total Inventory Value</p>
+              <p className="text-3xl font-bold mt-1">
+                {formatCurrency(totalInventoryValue)}
+              </p>
+            </div>
+            <div className="bg-white bg-opacity-20 rounded-full p-3">
+              <Package className="w-6 h-6" />
+            </div>
+          </div>
+          <div className="mt-4 text-sm flex items-center">
+            <TrendingUp className="w-4 h-4 mr-1" />
+            <span>+12.5% from last month</span>
+          </div>
+        </div>
+        
+        <div className="bg-gradient-to-r from-purple-600 to-purple-800 rounded-lg shadow-lg p-6 text-white">
+          <div className="flex items-center justify-between">
+            <div>
+              <p className="text-sm font-medium uppercase">Transactions (30d)</p>
+              <p className="text-3xl font-bold mt-1">{transactions.length}</p>
+            </div>
+            <div className="bg-white bg-opacity-20 rounded-full p-3">
+              <ShoppingCart className="w-6 h-6" />
+            </div>
+          </div>
+          <div className="mt-4 text-sm flex items-center">
+            <TrendingUp className="w-4 h-4 mr-1" />
+            <span>+8.2% from last month</span>
+          </div>
+        </div>
+        
+        <div className="bg-gradient-to-r from-red-600 to-red-800 rounded-lg shadow-lg p-6 text-white">
+          <div className="flex items-center justify-between">
+            <div>
+              <p className="text-sm font-medium uppercase">Fraud Alerts</p>
+              <p className="text-3xl font-bold mt-1">{fraudAlerts.length}</p>
+            </div>
+            <div className="bg-white bg-opacity-20 rounded-full p-3">
+              <AlertTriangle className="w-6 h-6" />
+            </div>
+          </div>
+          <div className="mt-4 text-sm flex items-center">
+            <AlertOctagon className="w-4 h-4 mr-1" />
+            <span>{fraudAlerts.filter(a => !a.resolved).length} unresolved alerts</span>
+          </div>
+        </div>
+
+        {/* Recent Transactions */}
+        <div className="lg:col-span-2 bg-white dark:bg-gray-800 rounded-lg shadow-lg p-6">
+          <h2 className="text-lg font-semibold mb-4 flex items-center">
+            <Activity className="w-5 h-5 mr-2 text-blue-600" />
+            Recent Transactions
+          </h2>
+          <div className="overflow-x-auto">
+            <table className="min-w-full divide-y divide-gray-200 dark:divide-gray-700">
+              <thead className="bg-gray-50 dark:bg-gray-700">
+                <tr>
+                  <th className="px-3 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">Transactions-ID</th>
+                  <th className="px-3 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">TransactionValue</th>
+                  <th className="px-3 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">TransactionVolume</th>
+                  <th className="px-3 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">SupplyChainNodeType</th>
+                  <th className="px-3 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">TransportationMethod</th>
                 </tr>
-              ))}
-            </tbody>
-          </table>
+              </thead>
+              <tbody className="bg-white dark:bg-gray-800 divide-y divide-gray-200 dark:divide-gray-700">
+                {transactions.slice(0, 5).map((transaction, index) => (
+                  <tr key={transaction._id || transaction.id || index} className={transaction.fraudDetected ? "bg-red-50 dark:bg-red-900 dark:bg-opacity-20" : ""}>
+                    <td className="px-3 py-4 whitespace-nowrap text-sm font-medium text-gray-900 dark:text-white">{transaction.transactionId}</td>
+                    <td className="px-3 py-4 whitespace-nowrap text-sm text-gray-500 dark:text-gray-300">{transaction.transactionValue}</td>
+                    <td className="px-3 py-4 whitespace-nowrap text-sm text-gray-500 dark:text-gray-300">{formatCurrency(transaction.transactionVolume)}</td>
+                    <td className="px-3 py-4 whitespace-nowrap text-sm text-gray-500 dark:text-gray-300">{transaction.supplyChainNodeType}</td>
+                    <td className="px-3 py-4 whitespace-nowrap text-sm">
+                      {transaction.transportationMethod}
+                    </td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
         </div>
-      </div>
 
-      {/* Notifications & Alerts */}
-      <div className="bg-white dark:bg-gray-800 rounded-lg shadow-lg p-6">
-        <h2 className="text-lg font-semibold mb-4 flex items-center">
-          <Bell className="w-5 h-5 mr-2 text-blue-600" />
-          Latest Notifications
-        </h2>
-        <div className="space-y-4">
-          {notifications.slice(0, 5).map((notification) => (
-            <div key={notification.id} className={`p-3 rounded-lg border ${notification.read ? 'border-gray-200 dark:border-gray-700' : 'border-blue-200 dark:border-blue-700 bg-blue-50 dark:bg-blue-900 dark:bg-opacity-20'}`}>
-              <div className="flex items-start">
-                <div className="flex-shrink-0">
-                  {renderNotificationIcon(notification.type)}
-                </div>
-                <div className="ml-3 flex-1">
-                  <p className="text-sm font-medium text-gray-900 dark:text-white">{notification.message}</p>
-                  <p className="mt-1 text-xs text-gray-500 dark:text-gray-400">{formatDate(notification.timestamp)}</p>
+        {/* Notifications & Alerts */}
+        <div className="bg-white dark:bg-gray-800 rounded-lg shadow-lg p-6">
+          <h2 className="text-lg font-semibold mb-4 flex items-center">
+            <Bell className="w-5 h-5 mr-2 text-blue-600" />
+            Latest Notifications
+          </h2>
+          <div className="space-y-4">
+            {notifications.slice(0, 5).map((notification, index) => (
+              <div key={notification.id || `notif-${index}`} className={`p-3 rounded-lg border ${notification.read ? 'border-gray-200 dark:border-gray-700' : 'border-blue-200 dark:border-blue-700 bg-blue-50 dark:bg-blue-900 dark:bg-opacity-20'}`}>
+                <div className="flex items-start">
+                  <div className="flex-shrink-0">
+                    {renderNotificationIcon(notification.type)}
+                  </div>
+                  <div className="ml-3 flex-1">
+                    <p className="text-sm font-medium text-gray-900 dark:text-white">{notification.message}</p>
+                    <p className="mt-1 text-xs text-gray-500 dark:text-gray-400">{formatDate(notification.timestamp)}</p>
+                  </div>
                 </div>
               </div>
-            </div>
-          ))}
+            ))}
+          </div>
         </div>
       </div>
-    </div>
-  );
+    );
+  };
 
   // Product Listing component
   const ProductListing = () => (
@@ -655,18 +668,16 @@ const RetailerDashboard = () => {
           <thead className="bg-gray-50 dark:bg-gray-700">
             <tr>
               <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">Product</th>
-              <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">Producer</th>
-              <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">Batch</th>
+              <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">Product-Id</th>
+              <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">Location</th>
               <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">Expiry</th>
-              <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">Price</th>
-              <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">Quantity</th>
-              <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">Storage</th>
+              <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">Certificate</th>
               <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">Action</th>
             </tr>
           </thead>
           <tbody className="bg-white dark:bg-gray-800 divide-y divide-gray-200 dark:divide-gray-700">
-            {filteredProducts.map((product) => (
-              <tr key={product.id}>
+            {(products || []).map((product, index) => (
+              <tr key={product.id || `prod-${index}`}>
                 <td className="px-4 py-4 whitespace-nowrap">
                   <div className="flex items-center">
                     <div className="flex-shrink-0 h-10 w-10 bg-blue-100 dark:bg-blue-800 rounded-full flex items-center justify-center">
@@ -674,30 +685,23 @@ const RetailerDashboard = () => {
                     </div>
                     <div className="ml-4">
                       <div className="text-sm font-medium text-gray-900 dark:text-white">{product.name}</div>
-                      <div className="text-xs text-gray-500 dark:text-gray-400">{product.packSize}</div>
+                      <div className="text-xs text-gray-500 dark:text-gray-400">{product.productId}</div>
                     </div>
                   </div>
                 </td>
                 <td className="px-4 py-4 whitespace-nowrap">
-                  <div className="text-sm text-gray-900 dark:text-white">{product.producer}</div>
+                  <div className="text-sm text-gray-900 dark:text-white">{product.manufacturingLocation}</div>
                   <div className="flex items-center mt-1">
-                    {product.certifications.map((cert, index) => (
-                      <span key={index} className="mr-1 inline-flex items-center px-2 py-0.5 rounded text-xs font-medium bg-green-100 text-green-800">
+                    {(product.certifications || []).map((cert, certIndex) => (
+                      <span key={`${product.id}-cert-${certIndex}`} className="mr-1 inline-flex items-center px-2 py-0.5 rounded text-xs font-medium bg-green-100 text-green-800">
                       {cert}
                     </span>
                   ))}
                 </div>
               </td>
-              <td className="px-4 py-4 whitespace-nowrap text-sm text-gray-500 dark:text-gray-300">{product.batchNumber}</td>
-              <td className="px-4 py-4 whitespace-nowrap text-sm text-gray-500 dark:text-gray-300">{formatDate(product.expiryDate)}</td>
-              <td className="px-4 py-4 whitespace-nowrap text-sm text-gray-500 dark:text-gray-300">{formatCurrency(product.price)}</td>
-              <td className="px-4 py-4 whitespace-nowrap text-sm text-gray-500 dark:text-gray-300">{product.quantity}</td>
-              <td className="px-4 py-4 whitespace-nowrap text-sm text-gray-500 dark:text-gray-300">
-                <div className="flex items-center">
-                  <Thermometer className="h-4 w-4 mr-1 text-blue-500" />
-                  {product.temperature}
-                </div>
-              </td>
+              <td className="px-4 py-4 whitespace-nowrap text-sm text-gray-500 dark:text-gray-300">{product.manufacturingTimestamp}</td>
+              <td className="px-4 py-4 whitespace-nowrap text-sm text-gray-500 dark:text-gray-300">{formatDate(product.expectedShelfLife)}</td>
+              <td className="px-4 py-4 whitespace-nowrap text-sm text-gray-500 dark:text-gray-300">{product.certificationStatus}</td>
               <td className="px-4 py-4 whitespace-nowrap text-sm font-medium">
                 <button 
                   onClick={() => buyProduct(product)}
@@ -738,34 +742,35 @@ const TransactionHistory = () => (
         <thead className="bg-gray-50 dark:bg-gray-700">
           <tr>
             <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">Transaction ID</th>
-            <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">Product</th>
-            <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">Batch</th>
-            <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">Quantity</th>
-            <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">Amount</th>
-            <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">Date</th>
-            <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">Status</th>
-            <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">Blockchain Hash</th>
+            <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">To Address</th>
+            <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">Node Type</th>
+            <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">Value</th>
+            <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">Volume</th>
+            <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">Transport</th>
           </tr>
         </thead>
         <tbody className="bg-white dark:bg-gray-800 divide-y divide-gray-200 dark:divide-gray-700">
           {transactions.map((transaction) => (
-            <tr key={transaction.id} className={transaction.fraudDetected ? "bg-red-50 dark:bg-red-900 dark:bg-opacity-20" : ""}>
-              <td className="px-4 py-4 whitespace-nowrap text-sm font-medium text-gray-900 dark:text-white">{transaction.id}</td>
-              <td className="px-4 py-4 whitespace-nowrap text-sm text-gray-500 dark:text-gray-300">{transaction.productName}</td>
-              <td className="px-4 py-4 whitespace-nowrap text-sm text-gray-500 dark:text-gray-300">{transaction.batchNumber}</td>
-              <td className="px-4 py-4 whitespace-nowrap text-sm text-gray-500 dark:text-gray-300">{transaction.quantity}</td>
-              <td className="px-4 py-4 whitespace-nowrap text-sm text-gray-500 dark:text-gray-300">{formatCurrency(transaction.totalAmount)}</td>
-              <td className="px-4 py-4 whitespace-nowrap text-sm text-gray-500 dark:text-gray-300">{formatDate(transaction.timestamp)}</td>
-              <td className="px-4 py-4 whitespace-nowrap text-sm">
-                {renderStatusBadge(transaction.status, transaction.fraudDetected)}
+            <tr key={transaction._id}>
+              <td className="px-4 py-4 whitespace-nowrap text-sm font-medium text-gray-900 dark:text-white">
+                {transaction.transactionId}
+              </td>
+              <td className="px-4 py-4 whitespace-nowrap text-sm text-gray-500 dark:text-gray-300">
+                {transaction.toAddress}
+              </td>
+              <td className="px-4 py-4 whitespace-nowrap text-sm text-gray-500 dark:text-gray-300">
+                {transaction.supplyChainNodeType}
+              </td>
+              <td className="px-4 py-4 whitespace-nowrap text-sm text-gray-500 dark:text-gray-300">
+                {formatCurrency(transaction.transactionValue)}
+              </td>
+              <td className="px-4 py-4 whitespace-nowrap text-sm text-gray-500 dark:text-gray-300">
+                {transaction.transactionVolume}
               </td>
               <td className="px-4 py-4 whitespace-nowrap text-sm text-gray-500 dark:text-gray-300">
                 <div className="flex items-center">
-                  <Hexagon className="h-4 w-4 mr-1 text-purple-500" />
-                  <span className="truncate w-16">{transaction.blockchainHash}</span>
-                  <button className="ml-1 text-blue-600 hover:text-blue-800" onClick={() => alert(`Full Hash: ${transaction.blockchainHash}`)}>
-                    <Eye className="h-4 w-4" />
-                  </button>
+                  <Truck className="h-4 w-4 mr-1 text-blue-500" />
+                  {transaction.transportationMethod}
                 </div>
               </td>
             </tr>
@@ -785,110 +790,232 @@ const TransactionHistory = () => (
 );
 
 // Fraud Detection component
-const FraudDetection = () => (
-  <div className="space-y-6">
-    <div className="bg-white dark:bg-gray-800 rounded-lg shadow-lg p-6">
-      <h2 className="text-lg font-semibold mb-4 flex items-center">
-        <Shield className="w-5 h-5 mr-2 text-blue-600" />
-        AI Fraud Detection System
-      </h2>
-      <p className="text-gray-600 dark:text-gray-300">
-        Our blockchain-based fraud detection system uses advanced AI algorithms to analyze transaction patterns,
-        product authenticity, and supply chain integrity to identify potential fraud in real-time.
-      </p>
-      <div className="mt-4 grid grid-cols-1 md:grid-cols-3 gap-4">
-        <div className="bg-blue-50 dark:bg-blue-900 dark:bg-opacity-20 p-4 rounded-lg">
-          <div className="flex items-center">
-            <div className="bg-blue-100 dark:bg-blue-800 rounded-full p-2">
-              <Database className="h-5 w-5 text-blue-600 dark:text-blue-300" />
-            </div>
-            <h3 className="ml-3 text-sm font-medium text-blue-800 dark:text-blue-300">Blockchain Verification</h3>
-          </div>
-          <p className="mt-2 text-xs text-gray-600 dark:text-gray-400">
-            Every transaction is verified and recorded on the blockchain for immutable tracking.
-          </p>
-        </div>
-        <div className="bg-purple-50 dark:bg-purple-900 dark:bg-opacity-20 p-4 rounded-lg">
-          <div className="flex items-center">
-            <div className="bg-purple-100 dark:bg-purple-800 rounded-full p-2">
-              <Activity className="h-5 w-5 text-purple-600 dark:text-purple-300" />
-            </div>
-            <h3 className="ml-3 text-sm font-medium text-purple-800 dark:text-purple-300">Pattern Recognition</h3>
-          </div>
-          <p className="mt-2 text-xs text-gray-600 dark:text-gray-400">
-            AI algorithms detect unusual transaction patterns and flag potential fraud attempts.
-          </p>
-        </div>
-        <div className="bg-green-50 dark:bg-green-900 dark:bg-opacity-20 p-4 rounded-lg">
-          <div className="flex items-center">
-            <div className="bg-green-100 dark:bg-green-800 rounded-full p-2">
-              <Pill className="h-5 w-5 text-green-600 dark:text-green-300" />
-            </div>
-            <h3 className="ml-3 text-sm font-medium text-green-800 dark:text-green-300">Product Authentication</h3>
-          </div>
-          <p className="mt-2 text-xs text-gray-600 dark:text-gray-400">
-            Verify product authenticity through digital signatures and secure supply chain tracking.
-          </p>
-        </div>
-      </div>
-    </div>
-    
-    <div className="bg-white dark:bg-gray-800 rounded-lg shadow-lg">
-      <div className="p-6 border-b border-gray-200 dark:border-gray-700">
-        <h2 className="text-lg font-semibold flex items-center">
-          <AlertOctagon className="w-5 h-5 mr-2 text-red-600" />
-          Fraud Alerts
+const FraudDetection = () => {
+  const [formData, setFormData] = useState({
+    transaction_id: '',
+    timestamp: '',
+    sender_address: '',
+    receiver_address: '',
+    product_id: '',
+    transaction_value: '',
+    transaction_volume: '',
+    payment_method: '',
+    transaction_completion_time: '',
+    product_category: '',
+    manufacturer_id: '',
+    manufacturing_location: '',
+    manufacturing_timestamp: '',
+    expected_shelf_life: '',
+    product_certification_status: '',
+    sender_historical_transaction_count: '',
+    receiver_historical_transaction_count: '',
+    network_connection_strength: '',
+    geographical_distance: '',
+    time_zone_difference: '',
+    market_price_deviation: '',
+    seasonality_factor: '',
+    supply_chain_node_type: '',
+    transportation_method: '',
+    temperature_logs: '',
+    image: null
+  });
+  const [response, setResponse] = useState(null);
+
+  const handleChange = (e) => {
+    const { name, value } = e.target;
+    setFormData({ ...formData, [name]: value });
+  };
+
+  const handleFileChange = (e) => {
+    setFormData({ ...formData, image: e.target.files[0] });
+  };
+
+  const handleSubmit = async (e) => {
+    e.preventDefault();
+    const fixedData = {
+      transaction_id: "58e72a8d-f9b1-4c5a-8373-4b7d2f9fea5d",
+      timestamp: "2024-05-15T08:30:45",
+      sender_address: "0x7fe42b83c159267a7b51e3c2e152d3d3a5b5b0a8",
+      receiver_address: "0x1a45cf8347dc0f4d9d8ace84532618b4e8d60582",
+      product_id: "PRD-3452-XY",
+      transaction_value: 15600.75,
+      transaction_volume: 45,
+      payment_method: "Bank Transfer",
+      transaction_completion_time: 12.5,
+      product_category: "Electronics",
+      manufacturer_id: "Manufacturer_12",
+      manufacturing_location: "China",
+      manufacturing_timestamp: "2024-01-10T14:20:30",
+      expected_shelf_life: 730,
+      product_certification_status: "Certified",
+      sender_historical_transaction_count: 245,
+      receiver_historical_transaction_count: 189,
+      network_connection_strength: 0.45,
+      geographical_distance: 5280.5,
+      time_zone_difference: 8,
+      market_price_deviation: 2.1,
+      seasonality_factor: 1.05,
+      supply_chain_node_type: "Distributor",
+      transportation_method: "Air Freight",
+      temperature_logs: 22.4
+    };
+
+    try {
+      const response = await axios.post('https://likely-suitable-mako.ngrok-free.app/predict', fixedData, {
+        headers: {
+          'Content-Type': 'application/json'
+        }
+      });
+      setResponse(response.data);
+    } catch (error) {
+      console.error('Error submitting form:', error);
+    }
+  };
+
+  return (
+    <div className="space-y-6">
+      <div className="bg-white dark:bg-gray-800 rounded-lg shadow-lg p-6">
+        <h2 className="text-lg font-semibold mb-4 flex items-center">
+          <Shield className="w-5 h-5 mr-2 text-blue-600" />
+          AI Fraud Detection System
         </h2>
+        <form onSubmit={handleSubmit} className="space-y-4">
+          <div>
+            <label className="block text-sm font-medium text-gray-700 dark:text-gray-300">Transaction ID</label>
+            <input
+              type="text"
+              name="transaction_id"
+              value={formData.transaction_id}
+              onChange={handleChange}
+              className="mt-1 block w-full border border-gray-300 dark:border-gray-600 rounded-md shadow-sm focus:ring-blue-500 focus:border-blue-500 sm:text-sm dark:bg-gray-700 dark:text-white"
+            />
+          </div>
+          <div>
+            <label className="block text-sm font-medium text-gray-700 dark:text-gray-300">Timestamp</label>
+            <input
+              type="datetime-local"
+              name="timestamp"
+              value={formData.timestamp}
+              onChange={handleChange}
+              className="mt-1 block w-full border border-gray-300 dark:border-gray-600 rounded-md shadow-sm focus:ring-blue-500 focus:border-blue-500 sm:text-sm dark:bg-gray-700 dark:text-white"
+            />
+          </div>
+          <div>
+            <label className="block text-sm font-medium text-gray-700 dark:text-gray-300">Sender Address</label>
+            <input
+              type="text"
+              name="sender_address"
+              value={formData.sender_address}
+              onChange={handleChange}
+              className="mt-1 block w-full border border-gray-300 dark:border-gray-600 rounded-md shadow-sm focus:ring-blue-500 focus:border-blue-500 sm:text-sm dark:bg-gray-700 dark:text-white"
+            />
+          </div>
+          <div>
+            <label className="block text-sm font-medium text-gray-700 dark:text-gray-300">Receiver Address</label>
+            <input
+              type="text"
+              name="receiver_address"
+              value={formData.receiver_address}
+              onChange={handleChange}
+              className="mt-1 block w-full border border-gray-300 dark:border-gray-600 rounded-md shadow-sm focus:ring-blue-500 focus:border-blue-500 sm:text-sm dark:bg-gray-700 dark:text-white"
+            />
+          </div>
+          <div>
+            <label className="block text-sm font-medium text-gray-700 dark:text-gray-300">Product ID</label>
+            <input
+              type="text"
+              name="product_id"
+              value={formData.product_id}
+              onChange={handleChange}
+              className="mt-1 block w-full border border-gray-300 dark:border-gray-600 rounded-md shadow-sm focus:ring-blue-500 focus:border-blue-500 sm:text-sm dark:bg-gray-700 dark:text-white"
+            />
+          </div>
+          <div>
+            <label className="block text-sm font-medium text-gray-700 dark:text-gray-300">Image</label>
+            <input
+              type="file"
+              name="image"
+              onChange={handleFileChange}
+              className="mt-1 block w-full text-sm text-gray-500 dark:text-gray-400"
+            />
+          </div>
+          <button
+            type="submit"
+            className="inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md shadow-sm text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500"
+          >
+            Submit
+          </button>
+        </form>
+        {response && (
+          <div className="mt-6 bg-gray-50 dark:bg-gray-700 p-4 rounded-lg">
+            <h3 className="text-lg font-semibold text-gray-900 dark:text-white">Response</h3>
+            <div className="mt-2 text-sm text-gray-700 dark:text-gray-300">
+              <p><strong>Prediction:</strong> {response.prediction}</p>
+              <p><strong>Probability:</strong> {response.probability}</p>
+              <p><strong>Risk Level:</strong> {response.risk_level}</p>
+              <p><strong>Risk Score:</strong> {response.risk_score}</p>
+              <p><strong>Timestamp:</strong> {new Date(response.timestamp).toLocaleString()}</p>
+            </div>
+          </div>
+        )}
       </div>
-      
-      <div>
-        {fraudAlerts.length > 0 ? (
-          <div className="divide-y divide-gray-200 dark:divide-gray-700">
-            {fraudAlerts.map((alert) => (
-              <div key={alert.id} className="p-6 bg-red-50 dark:bg-red-900 dark:bg-opacity-20">
-                <div className="flex items-start">
-                  <div className="flex-shrink-0">
-                    <AlertTriangle className="h-6 w-6 text-red-600" />
-                  </div>
-                  <div className="ml-3">
-                    <h3 className="text-sm font-medium text-red-800 dark:text-red-300">
-                      High Severity Fraud Alert: Transaction {alert.transactionId}
-                    </h3>
-                    <div className="mt-2 text-sm text-red-700 dark:text-red-200">
-                      <p>{alert.details}</p>
+      <div className="bg-white dark:bg-gray-800 rounded-lg shadow-lg">
+        <div className="p-6 border-b border-gray-200 dark:border-gray-700">
+          <h2 className="text-lg font-semibold flex items-center">
+            <AlertOctagon className="w-5 h-5 mr-2 text-red-600" />
+            Fraud Alerts
+          </h2>
+        </div>
+        
+        <div>
+          {fraudAlerts.length > 0 ? (
+            <div className="divide-y divide-gray-200 dark:divide-gray-700">
+              {fraudAlerts.map((alert) => (
+                <div key={alert.id} className="p-6 bg-red-50 dark:bg-red-900 dark:bg-opacity-20">
+                  <div className="flex items-start">
+                    <div className="flex-shrink-0">
+                      <AlertTriangle className="h-6 w-6 text-red-600" />
                     </div>
-                    <div className="mt-3">
-                      <div className="flex space-x-2">
-                        <button
-                          type="button"
-                          className="inline-flex items-center px-3 py-2 border border-transparent text-sm leading-4 font-medium rounded-md text-white bg-red-600 hover:bg-red-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-red-500"
-                        >
-                          Investigate
-                        </button>
-                        <button
-                          type="button"
-                          className="inline-flex items-center px-3 py-2 border border-gray-300 shadow-sm text-sm leading-4 font-medium rounded-md text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-red-500"
-                        >
-                          Resolve
-                        </button>
+                    <div className="ml-3">
+                      <h3 className="text-sm font-medium text-red-800 dark:text-red-300">
+                        High Severity Fraud Alert: Transaction {alert.transactionId}
+                      </h3>
+                      <div className="mt-2 text-sm text-red-700 dark:text-red-200">
+                        <p>{alert.details}</p>
+                      </div>
+                      <div className="mt-3">
+                        <div className="flex space-x-2">
+                          <button
+                            type="button"
+                            className="inline-flex items-center px-3 py-2 border border-transparent text-sm leading-4 font-medium rounded-md text-white bg-red-600 hover:bg-red-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-red-500"
+                          >
+                            Investigate
+                          </button>
+                          <button
+                            type="button"
+                            className="inline-flex items-center px-3 py-2 border border-gray-300 shadow-sm text-sm leading-4 font-medium rounded-md text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-red-500"
+                          >
+                            Resolve
+                          </button>
+                        </div>
                       </div>
                     </div>
                   </div>
                 </div>
-              </div>
-            ))}
-          </div>
-        ) : (
-          <div className="p-8 text-center">
-            <CheckCircle className="h-12 w-12 mx-auto text-green-500" />
-            <h3 className="mt-2 text-sm font-medium text-gray-900 dark:text-white">No fraud alerts</h3>
-            <p className="mt-1 text-sm text-gray-500 dark:text-gray-400">All transactions are currently verified and secure.</p>
-          </div>
-        )}
+              ))}
+            </div>
+          ) : (
+            <div className="p-8 text-center">
+              <CheckCircle className="h-12 w-12 mx-auto text-green-500" />
+              <h3 className="mt-2 text-sm font-medium text-gray-900 dark:text-white">No fraud alerts</h3>
+              <p className="mt-1 text-sm text-gray-500 dark:text-gray-400">All transactions are currently verified and secure.</p>
+            </div>
+          )}
+        </div>
       </div>
     </div>
-  </div>
-);
+  );
+};
 
 // Main component
 return (
@@ -963,7 +1090,11 @@ return (
           </div>
           <div className="flex items-center">
             <div className="relative">
-              <button
+              <button className="relative p-2 text-gray-500 hover:text-gray-700 focus:outline-none focus:ring-2 focus:ring-inset focus:ring-blue-500" onClick={navigate('/overall-fraud')}>
+                <ShieldHalf className='w-4 h-4' />
+                Over-All Fraud Deteaction 
+              </button>
+              <button 
                 onClick={() => setShowNotifications(!showNotifications)}
                 className="relative p-2 text-gray-500 hover:text-gray-700 focus:outline-none focus:ring-2 focus:ring-inset focus:ring-blue-500"
               >
@@ -977,8 +1108,8 @@ return (
                   <div className="p-4">
                     <h3 className="text-sm font-medium text-gray-900 dark:text-white">Notifications</h3>
                     <div className="mt-2 space-y-2">
-                      {notifications.slice(0, 5).map((notification) => (
-                        <div key={notification.id} className={`p-2 rounded-md ${notification.read ? '' : 'bg-blue-50 dark:bg-blue-900 dark:bg-opacity-20'}`}>
+                      {notifications.slice(0, 5).map((notification, index) => (
+                        <div key={notification.id || `notif-${index}`} className={`p-2 rounded-md ${notification.read ? '' : 'bg-blue-50 dark:bg-blue-900 dark:bg-opacity-20'}`}>
                           <div className="flex items-start">
                             <div className="flex-shrink-0">
                               {renderNotificationIcon(notification.type)}
@@ -1032,3 +1163,5 @@ return (
 };
 
 export default RetailerDashboard;
+
+

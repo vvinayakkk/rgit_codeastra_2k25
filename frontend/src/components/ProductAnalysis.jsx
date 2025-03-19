@@ -53,7 +53,7 @@ const ProductAnalysis = ({ product, onComplete }) => {
   };
 
   const handleViewDetails = (stage) => {
-    setShowDetails(stage.id);
+    handleNavigation(stage.name);
   };
 
   const handleCloseModal = () => {
@@ -68,6 +68,8 @@ const ProductAnalysis = ({ product, onComplete }) => {
         navigate('/compliance-check');
     }else if(name === 'Fraud Detection'){
         navigate('/fraud-detection');
+    }else {
+        navigate('/reports');
     }
   }
 
@@ -140,63 +142,6 @@ const ProductAnalysis = ({ product, onComplete }) => {
         </div>
       </div>
 
-      {showDetails && (
-        <div className="fixed inset-0 bg-black bg-opacity-60 flex items-center justify-center z-50">
-          <div className="bg-gray-800 rounded-lg shadow-lg w-full max-w-lg p-6">
-            <div className="flex justify-between items-center mb-4">
-              <h3 className="text-xl font-medium">{analysisStages[showDetails-1]?.name} Details</h3>
-              <button 
-                className="text-gray-400 hover:text-white"
-                onClick={() => setShowDetails(false)}
-              >
-                ×
-              </button>
-            </div>
-            
-            <div className="bg-gray-700 p-4 rounded-lg mb-4">
-              <h4 className="font-medium mb-2">Analysis Results</h4>
-              <div className="space-y-2">
-                <div className="flex justify-between">
-                  <span>Confidence Score:</span>
-                  <span className="font-medium">98.7%</span>
-                </div>
-                <div className="flex justify-between">
-                  <span>Verification Method:</span>
-                  <span className="font-medium">Blockchain + AI</span>
-                </div>
-                <div className="flex justify-between">
-                  <span>Time Elapsed:</span>
-                  <span className="font-medium">1.2s</span>
-                </div>
-              </div>
-            </div>
-            
-            <div className="bg-gray-700 p-4 rounded-lg">
-              <h4 className="font-medium mb-2">Detailed Report</h4>
-              <p className="text-sm text-gray-300">
-                The {analysisStages[showDetails-1]?.name.toLowerCase()} process has {
-                  analysisStages[showDetails-1]?.status === 'completed' ? 'completed successfully' :
-                  analysisStages[showDetails-1]?.status === 'processing' ? 'begun processing' : 'not started yet'
-                }. {
-                  analysisStages[showDetails-1]?.status === 'completed' ?
-                  'All verification checks have passed with no anomalies detected.' :
-                  'This stage is currently analyzing the product data against our verified database.'
-                }
-              </p>
-            </div>
-            
-            <div className="flex justify-end mt-6">
-              <button 
-                className="px-4 py-2 bg-blue-600 hover:bg-blue-700 rounded-lg"
-                onClick={() => setShowDetails(false)}
-              >
-                Close Details
-              </button>
-            </div>
-          </div>
-        </div>
-      )}
-
       {completedProducts.length > 0 && (
         <div className="bg-gray-800 rounded-lg p-6 shadow-lg">
           <h3 className="text-xl font-medium mb-4">Recently Processed Products</h3>
@@ -221,7 +166,8 @@ const ProductAnalysis = ({ product, onComplete }) => {
                       </span>
                     </td>
                     <td className="px-4 py-3">
-                      <button onClick={handleNavigation(item.name)}
+                      <button 
+                        onClick={() => handleNavigation(item.name)}
                         className="px-3 py-1 bg-blue-600 hover:bg-blue-700 rounded text-xs"
                       >
                         View Report

@@ -47,11 +47,15 @@ function Products() {
   });
   const [receivableTransactions, setReceivableTransactions] = useState([]);
   const [receiverAddress, setReceiverAddress] = useState('');
-
+  const [selectedProduct, setSelectedProduct] = useState(null);
+  const [destination , setDestination] = useState();
+  const [showAnalysisAfterTransport, setShowAnalysisAfterTransport] = useState(false);
   const fetchProducts = async () => {
     try {
       setIsLoading(true);
       const response = await axios.get(`http://localhost:7000/api/products`);
+      if (response.data) {
+      const response = await axios.get(`http://localhost:7000/api/products`);}
       if (response.data) {
         setProducts(response.data);
       }
@@ -230,16 +234,14 @@ function Products() {
         transportDetails.transportationMethod
       );
       if (result.status === "success") {
-        alert(`Transport initiated successfully! TxHash: ${result.txHash}`);
-        setTransportDetails({
-          transactionId: '',
-          toAddress: '',
-          transactionValue: 0,
-          transactionVolume: 0,
-          supplyChainNodeType: '',
-          transportationMethod: '',
-        });
         document.getElementById(`transportModal-${productId}`).classList.add('hidden');
+        
+        // Set current product and show analysis
+        const product = products.find(p => p.productId === productId);
+        setCurrentProduct(product);
+        setShowAnalysisAfterTransport(true);
+        
+        // Update receivable transactions
         const txs = await getReceivableTransactions(receiverAddress);
         if (txs && txs.status !== "error") {
           setReceivableTransactions(txs);
@@ -271,8 +273,24 @@ function Products() {
     }
   };
 
-  const navigateToShipments = (productId) => {
-    window.location.href = `/shipments?productId=${productId}`;
+  const navigateToShipments = (productId, src) => {
+    if (destination) {
+      window.location.href = `/shipments/${productId}/${src}/${destination}`;
+    }
+  };
+
+  const handleTrackClick = (productId, src) => {
+    setSelectedProduct({ id: productId, src });
+    document.getElementById('destinationModal').classList.remove('hidden');
+  };
+
+  const handleDestinationSubmit = () => {
+    if (selectedProduct && destination) {
+      navigateToShipments(selectedProduct.id, selectedProduct.src);
+      document.getElementById('destinationModal').classList.add('hidden');
+      setDestination('');
+      setSelectedProduct(null);
+    }
   };
 
   const onComplianceComplete = () => {
@@ -322,6 +340,27 @@ function Products() {
               </button>
             </div>
           </div>
+
+          {showAnalysisAfterTransport && (
+            <div className="fixed inset-0 bg-black bg-opacity-60 flex items-center justify-center z-50">
+              <div className="bg-gray-800 rounded-lg shadow-lg w-full max-w-4xl p-6">
+                <ProductAnalysis 
+                  product={currentProduct} 
+                  onComplete={() => {
+                    setShowAnalysisAfterTransport(false);
+                    setTransportDetails({
+                      transactionId: '',
+                      toAddress: '',
+                      transactionValue: 0,
+                      transactionVolume: 0,
+                      supplyChainNodeType: '',
+                      transportationMethod: '',
+                    });
+                  }} 
+                />
+              </div>
+            </div>
+          )}
 
           {/* All Products Section */}
           <div className="bg-gray-800 rounded-lg p-6 shadow-lg mb-6">
@@ -379,7 +418,7 @@ function Products() {
                         <td className="px-4 py-3">
                           <button
                             className="px-3 py-1 bg-blue-600 hover:bg-blue-700 rounded text-xs mr-2"
-                            onClick={() => navigateToShipments(product.productId)}
+                            onClick={() => handleTrackClick(product.productId, product.manufacturingLocation)}
                           >
                             Track
                           </button>
@@ -734,6 +773,55 @@ function Products() {
                   disabled={!receiveDetails.transactionId || !receiveDetails.productId}
                 >
                   Receive Product
+                </button>
+              </div>
+            </div>
+          </div>
+
+          {/* Destination Modal */}
+          <div id="destinationModal" className="fixed inset-0 bg-black bg-opacity-60 flex items-center justify-center z-50 hidden">
+            <div className="bg-gray-800 rounded-lg shadow-lg w-full max-w-md p-6">
+              <div className="flex justify-between items-center mb-4">
+                <h3 className="text-xl font-medium">Enter Destination Country</h3>
+                <button
+                  className="text-gray-400 hover:text-white"
+                  onClick={() => {
+                    document.getElementById('destinationModal').classList.add('hidden');
+                    setDestination('');
+                    setSelectedProduct(null);
+                  }}
+                >
+                  ×
+                </button>
+              </div>
+
+              <div className="mb-4">
+                <input
+                  type="text"
+                  value={destination}
+                  onChange={(e) => setDestination(e.target.value)}
+                  className="w-full p-2 bg-gray-700 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+                  placeholder="Enter destination country"
+                />
+              </div>
+
+              <div className="flex justify-end space-x-3">
+                <button
+                  className="px-4 py-2 border border-gray-600 rounded-lg hover:bg-gray-700"
+                  onClick={() => {
+                    document.getElementById('destinationModal').classList.add('hidden');
+                    setDestination('');
+                    setSelectedProduct(null);
+                  }}
+                >
+                  Cancel
+                </button>
+                <button
+                  className="px-4 py-2 bg-blue-600 hover:bg-blue-700 rounded-lg"
+                  onClick={handleDestinationSubmit}
+                  disabled={!destination}
+                >
+                  Track
                 </button>
               </div>
             </div>
