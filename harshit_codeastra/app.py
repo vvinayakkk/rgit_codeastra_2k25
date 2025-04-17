@@ -35,6 +35,10 @@ app = Flask(__name__)
 CORS(app)
 
 # Twilio configuration
+TWILIO_WHATSAPP_NUMBER = "whatsapp:+14155238886"  # Twilio Sandbox Number
+TWILIO_ACCOUNT_SID = ''
+TWILIO_AUTH_TOKEN = ''
+content_sid=''
 twilio_client = Client(TWILIO_ACCOUNT_SID, TWILIO_AUTH_TOKEN,content_sid)
 
 # Google API configuration
