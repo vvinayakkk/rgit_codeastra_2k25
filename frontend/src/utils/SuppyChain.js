@@ -3,7 +3,7 @@ import Web3 from "web3";
 let web3;
 let contract;
 
-const BACKEND_URL = "https://dbf2-206-84-234-172.ngrok-free.app"; // Replace with your Flask ngrok URL
+const BACKEND_URL = "https://glorious-oryx-ample.ngrok-free.app"; // Replace with your Flask ngrok URL
 
 async function initContract() {
     if (!contract) {

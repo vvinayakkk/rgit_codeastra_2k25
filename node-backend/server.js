@@ -1,4 +1,4 @@
-// server.js
+
 const express = require('express');
 const http = require('http');
 const { Server } = require('socket.io');
@@ -18,8 +18,11 @@ const expressServer = app.listen(PORT, () => {
 });
 
 const io = new Server(expressServer, {
-    cors: '*'
-  });
+  cors: {
+    origin: '*', // Adjust this based on your needs, '*' allows all origins
+    methods: ['GET', 'POST']
+  }
+});
 
 io.on('connection', (socket) => {
   console.log(`User connected: ${socket.id}`);
@@ -35,12 +38,20 @@ io.on('connection', (socket) => {
   socket.on('startDelivery', (data) => {
     const { routeId, coordinates } = data;
     io.to(routeId).emit('deliveryStarted', { routeId, coordinates });
+    console.log(`Delivery started for route ${routeId}`);
   });
 
   // Handle location updates and broadcast to the room
   socket.on('locationUpdate', (data) => {
     const { routeId, coordinate, position } = data;
     io.to(routeId).emit('locationUpdate', { routeId, coordinate, position });
+  });
+
+  // Handle delivery completed and broadcast to the room
+  socket.on('deliveryCompleted', (data) => {
+    const { routeId } = data;
+    io.to(routeId).emit('deliveryCompleted', { routeId });
+    console.log(`Delivery completed for route ${routeId}, broadcasted to room`);
   });
 
   // Handle RFID verification and broadcast result to the room
@@ -50,7 +61,7 @@ io.on('connection', (socket) => {
 
     if (usedRFIDs.includes(rfid)) {
       status = 'fraud-detected';
-    } else if (rfid === expectedRFID) {
+    } else if (rfid === 'RFID-123456788') {
       status = 'verified';
       usedRFIDs.push(rfid); // Add to used RFIDs array
     } else {
@@ -63,6 +74,6 @@ io.on('connection', (socket) => {
 
   socket.on('disconnect', () => {
     console.log(`User disconnected: ${socket.id}`);
-  });
+  });
 });
 

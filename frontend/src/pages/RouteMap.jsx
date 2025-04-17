@@ -1,5 +1,6 @@
+
 import React, { useEffect, useState, useRef } from 'react';
-import { useNavigate, useLocation } from 'react-router-dom';
+import { useNavigate, useLocation, useParams } from 'react-router-dom';
 import mapboxgl from 'mapbox-gl';
 import 'mapbox-gl/dist/mapbox-gl.css';
 import io from 'socket.io-client';
@@ -12,30 +13,6 @@ const WalletDetails = ({ blockchainData }) => {
       <h2 className="text-2xl font-bold mb-6 text-blue-400">Wallet Analysis</h2>
       <div className="bg-slate-800 rounded-lg p-6 border border-slate-700">
         <div className="space-y-4">
-          <div className="flex items-center">
-            <div dangerouslySetInnerHTML={{ __html: blockchainData.walletIcon }} />
-            <h3 className="ml-2 text-xl text-blue-300">{blockchainData.walletType}</h3>
-          </div>
-          <div className="grid grid-cols-2 gap-4">
-            <div>
-              <p className="text-gray-400">Address</p>
-              <p className="text-sm font-mono break-all">{blockchainData.walletAddress}</p>
-            </div>
-            <div>
-              <p className="text-gray-400">Balance</p>
-              <p className="text-green-300">{blockchainData.walletBalance}</p>
-            </div>
-            <div>
-              <p className="text-gray-400">Gas/Fee</p>
-              <p className="text-yellow-300">{blockchainData.walletGas}</p>
-            </div>
-            <div>
-              <p className="text-gray-400">Transparency</p>
-              <p className={blockchainData.transparency === 'valid' ? 'text-green-300' : 'text-red-300'}>
-                {blockchainData.transparency}
-              </p>
-            </div>
-          </div>
           <div className="mt-4">
             <h4 className="text-blue-300 mb-2">Blockchain Validation Process</h4>
             <ul className="space-y-2 text-sm">
@@ -124,23 +101,6 @@ const BlockchainSection = ({ blockchainData, navigate }) => {
         readOnly
         className="w-full p-3 bg-slate-700 text-white rounded border border-slate-600 font-mono text-sm"
       />
-      {blockchainData?.walletIcon && (
-        <div className="p-3 bg-slate-700 rounded-md border border-slate-600">
-          <div className="flex items-center mb-2">
-            <div className="mr-2" dangerouslySetInnerHTML={{ __html: blockchainData.walletIcon }} />
-            <span className="font-medium text-blue-300">{blockchainData.walletType}</span>
-          </div>
-          <div className="text-xs text-gray-400 truncate mb-1">{blockchainData.walletAddress}</div>
-          <div className="flex justify-between mt-2">
-            <span className="text-sm text-gray-300">Balance:</span>
-            <span className="text-sm text-green-300">{blockchainData.walletBalance}</span>
-          </div>
-          <div className="flex justify-between">
-            <span className="text-sm text-gray-300">Gas:</span>
-            <span className="text-sm text-yellow-300">{blockchainData.walletGas}</span>
-          </div>
-        </div>
-      )}
       {blockchainData?.packageStats && (
         <div className="p-3 bg-slate-700 rounded-md border border-slate-600">
           <h4 className="text-sm font-medium text-blue-300 mb-2">Package Statistics</h4>
@@ -243,6 +203,7 @@ const AISection = ({ aiValidation, navigate }) => {
 const RouteMap = () => {
   const navigate = useNavigate();
   const location = useLocation();
+  const { productId, src, dest } = useParams();
   const mapContainer = useRef(null);
   const map = useRef(null);
   const animationRef = useRef(null);
@@ -297,17 +258,16 @@ const RouteMap = () => {
     setIsLoading(true);
     try {
       const response = await fetch(
-        `https://api.mapbox.com/geocoding/v5/mapbox.places/${encodeURIComponent(query)}.json?access_token=${mapboxgl.accessToken}&limit=1`
+        `https://api.mapbox.com/geocoding/v5/mapbox.places/${encodeURIComponent(query)}.json?access_token=${mapboxgl.accessToken}&limit=1&bbox=68.7,8.4,97.4,37.1`
       );
       const data = await response.json();
       if (data.features && data.features.length > 0) {
         const [lng, lat] = data.features[0].center;
-        setCustomCoords([lng, lat]);
         return [lng, lat];
       } else {
         setNotification({
           type: 'error',
-          message: 'Location not found!',
+          message: `Location not found: ${query}`,
           time: new Date().toLocaleTimeString()
         });
         return null;
@@ -325,123 +285,108 @@ const RouteMap = () => {
     }
   };
 
+  // Map Initialization
   useEffect(() => {
-    const params = new URLSearchParams(window.location.search);
-    const src = params.get('src');
-    const dest = params.get('dest');
-    const userRole = params.get('role') || 'producer';
-    setRole(userRole);
+    if (map.current || !mapContainer.current) return;
 
-    const generateRoute = (originCoords, destKey) => {
-      const routeId = customCoords ? `custom-to-${destKey}` : `${src}-to-${destKey}`;
-      const findIntermediatePoints = (start, end) => {
-        const potentialHops = Object.entries(locations).filter(([name]) => name !== src && name !== destKey);
-        const distanceBetween = (p1, p2) => Math.sqrt(Math.pow(p1[0] - p2[0], 2) + Math.pow(p1[1] - p2[1], 2));
-        const directDistance = distanceBetween(start, end) * 1.3;
-        const viableHops = potentialHops
-          .filter(([_, coords]) => {
-            const totalDistance = distanceBetween(start, coords) + distanceBetween(coords, end);
-            return totalDistance <= directDistance;
-          })
-          .map(([name, coords]) => ({ name, coords }));
-        viableHops.sort((a, b) => {
-          const aDist = distanceBetween(start, a.coords) + distanceBetween(a.coords, end);
-          const bDist = distanceBetween(start, b.coords) + distanceBetween(b.coords, end);
-          return aDist - bDist;
-        });
-        return viableHops.slice(0, 2);
-      };
-
-      const intermediatePoints = findIntermediatePoints(originCoords, locations[destKey]);
-      const newRoute = {
-        name: customCoords ? `Custom to ${destKey.charAt(0).toUpperCase() + destKey.slice(1)}` : `${src.charAt(0).toUpperCase() + src.slice(1)} to ${destKey.charAt(0).toUpperCase() + destKey.slice(1)}`,
-        origin: originCoords,
-        destination: locations[destKey],
-        warehouseId: `WH-MUM-${Math.floor(1000 + Math.random() * 9000)}`,
-        productId: `PRD-${Math.floor(1000 + Math.random() * 9000)}-${String.fromCharCode(65 + Math.floor(Math.random() * 26))}${String.fromCharCode(65 + Math.floor(Math.random() * 26))}`,
-        rfid: `RFID-${Math.floor(10000000 + Math.random() * 90000000)}`,
-        distance: `${(distanceBetween(originCoords, locations[destKey]) * 100).toFixed(1)} km`,
-        estimatedTime: `${Math.floor(30 + Math.random() * 40)} min`,
-        via: intermediatePoints.map(point => point.coords),
-        viaNames: intermediatePoints.map(point => point.name)
-      };
-      function distanceBetween(p1, p2) {
-        return Math.sqrt(Math.pow(p1[0] - p2[0], 2) + Math.pow(p1[1] - p2[1], 2));
-      }
-      setRouteData({ [routeId]: newRoute });
-      setSelectedRoute(routeId);
-      socket.current.emit('joinRoom', routeId);
-    };
-
-    if (customCoords && dest && locations[dest]) {
-      generateRoute(customCoords, dest);
-    } else if (src && dest && locations[src] && locations[dest]) {
-      generateRoute(locations[src], dest);
-    } else {
-      const defaultRoutes = {
-        'andheri-to-ghatkopar': {
-          name: "Andheri to Ghatkopar",
-          origin: locations.andheri,
-          destination: locations.ghatkopar,
-          warehouseId: "WH-MUM-1234",
-          productId: "PRD-3452-XY",
-          rfid: "RFID-123456788",
-          distance: "15.2 km",
-          estimatedTime: "45 min",
-          via: [locations.powai, locations.vikhroli],
-          viaNames: ['powai', 'vikhroli']
-        }
-      };
-      setRouteData(defaultRoutes);
-      setSelectedRoute('andheri-to-ghatkopar');
-      socket.current.emit('joinRoom', 'andheri-to-ghatkopar');
-    }
-  }, [customCoords]);
-
-  useEffect(() => {
-    if (map.current) return;
     map.current = new mapboxgl.Map({
       container: mapContainer.current,
       style: 'mapbox://styles/mapbox/streets-v11',
-      center: [72.8777, 19.0760],
-      zoom: 11,
+      center: [72.8777, 19.0760], // Default center (Mumbai)
+      zoom: 10,
       pitch: 45,
       bearing: 20
     });
     map.current.addControl(new mapboxgl.NavigationControl(), 'top-right');
     map.current.addControl(new mapboxgl.ScaleControl(), 'bottom-left');
 
-    map.current.on('load', () => {
-      if (map.current.getLayer('building')) {
-        map.current.setLayoutProperty('building', 'visibility', 'visible');
-        map.current.setPaintProperty('building', 'fill-extrusion-height', [
-          'interpolate', ['linear'], ['zoom'], 15, 0, 16, ['get', 'height']
-        ]);
-        map.current.setPaintProperty('building', 'fill-extrusion-base', [
-          'interpolate', ['linear'], ['zoom'], 15, 0, 16, ['get', 'min_height']
-        ]);
-        map.current.setPaintProperty('building', 'fill-extrusion-color', [
-          'interpolate', ['linear'], ['get', 'height'], 0, '#111111', 50, '#222222', 100, '#333333'
-        ]);
-      }
-      if (selectedRoute && routeData) drawRoute(selectedRoute);
-    });
-
     return () => {
+      if (map.current) {
+        map.current.remove();
+        map.current = null;
+      }
       if (animationRef.current) cancelAnimationFrame(animationRef.current);
       socket.current.disconnect();
-      map.current?.remove();
     };
   }, []);
 
+  // Route Generation with Single Hop
+  useEffect(() => {
+    const params = new URLSearchParams(location.search);
+    const userRole = params.get('role') || 'producer';
+    setRole(userRole);
+
+    const generateRoute = async () => {
+      setIsLoading(true);
+      let originCoords = customCoords || (locations[src] || await geocodeLocation(src));
+      const destCoords = locations[dest] || await geocodeLocation(dest);
+
+      if (!originCoords || !destCoords) {
+        const defaultRoute = {
+          'mumbai-to-pune': {
+            name: "Mumbai to Pune",
+            origin: [72.8777, 19.0760], // Mumbai
+            destination: [73.8567, 18.5204], // Pune
+            coordinates: [[72.8777, 19.0760], [73.8567, 18.5204]],
+            warehouseId: "WH-MUM-1234",
+            productId: "PRD-3452-XY",
+            rfid: "RFID-123456788",
+            distance: "150 km",
+            estimatedTime: "180 min",
+            via: [[73.3667, 18.7982]], // Midpoint between Mumbai and Pune (approx)
+            viaNames: ["Midpoint"]
+          }
+        };
+        setRouteData(defaultRoute);
+        setSelectedRoute('mumbai-to-pune');
+        socket.current.emit('joinRoom', 'mumbai-to-pune');
+        setNotification({
+          type: 'warning',
+          message: 'Invalid src or dest, using default route: Mumbai to Pune with one hop',
+          time: new Date().toLocaleTimeString()
+        });
+        setIsLoading(false);
+        return;
+      }
+
+      const routeId = `${productId}-${src}-to-${dest}`;
+      const routeCoordinates = await getOptimalRoute(originCoords, destCoords);
+      const hopIndex = Math.floor(routeCoordinates.length / 2); // Midpoint of the route
+      const hopPoint = routeCoordinates[hopIndex];
+
+      const distance = calculateDistance(originCoords, destCoords);
+      const newRoute = {
+        name: `${src.charAt(0).toUpperCase() + src.slice(1)} to ${dest.charAt(0).toUpperCase() + dest.slice(1)}`,
+        origin: originCoords,
+        destination: destCoords,
+        coordinates: routeCoordinates,
+        warehouseId: `WH-${Math.floor(1000 + Math.random() * 9000)}`,
+        productId: productId || `PRD-${Math.floor(1000 + Math.random() * 9000)}-${String.fromCharCode(65 + Math.floor(Math.random() * 26))}${String.fromCharCode(65 + Math.floor(Math.random() * 26))}`,
+        rfid: `RFID-123456788`,
+        distance: `${distance.toFixed(1)} km`,
+        estimatedTime: `${Math.floor(distance / 50 * 60)} min`,
+        via: [hopPoint], // Single hop at midpoint
+        viaNames: ["Hop"]
+      };
+
+      setRouteData({ [routeId]: newRoute });
+      setSelectedRoute(routeId);
+      socket.current.emit('joinRoom', routeId);
+      setIsLoading(false);
+    };
+
+    if (src && dest) generateRoute();
+  }, [src, dest, productId, customCoords, location.search]);
+
+  // Route Drawing
+  useEffect(() => {
+    if (!map.current || !map.current.loaded() || !selectedRoute || !routeData) return;
+    drawRoute(selectedRoute);
+  }, [selectedRoute, routeData]);
+
   useEffect(() => {
     socket.current.on('connect', () => {
-      console.log('Connected to WebSocket server');
       if (selectedRoute) socket.current.emit('joinRoom', selectedRoute);
-    });
-
-    socket.current.on('joined', (data) => {
-      console.log(`Joined room ${data.room} as ${role}`);
     });
 
     socket.current.on('deliveryStarted', (data) => {
@@ -476,59 +421,34 @@ const RouteMap = () => {
     };
   }, [role, selectedRoute]);
 
-  useEffect(() => {
-    if (map.current && map.current.loaded() && selectedRoute && routeData) {
-      drawRoute(selectedRoute);
-    }
-  }, [selectedRoute, routeData]);
-
-  useEffect(() => {
-    if (deliveryStatus !== 'in-transit') return;
-    const updateInterval = setInterval(() => {
-      setSensorReadings(prev => {
-        const tempChange = (Math.random() - 0.5) * 2;
-        const humidityChange = (Math.random() - 0.5) * 5;
-        const shockChange = Math.random() < 0.1 ? Math.random() * 2 : 0;
-        const batteryChange = -0.05;
-        const newTemp = Math.max(15, Math.min(35, prev.temperature.value + tempChange));
-        const newHumidity = Math.max(30, Math.min(90, prev.humidity.value + humidityChange));
-        const newShock = Math.max(0, Math.min(10, prev.shock.value + shockChange));
-        const newBattery = Math.max(0, Math.min(100, prev.battery.value + batteryChange));
-        if (newTemp > 30 || newHumidity > 85 || newShock > 5) {
-          setNotification({
-            type: 'warning',
-            message: newTemp > 30 ? 'High temperature detected!' : newHumidity > 85 ? 'High humidity detected!' : 'Impact detected!',
-            time: new Date().toLocaleTimeString()
-          });
-        }
-        return {
-          temperature: { value: parseFloat(newTemp.toFixed(1)), status: newTemp > 30 ? 'warning' : 'normal' },
-          humidity: { value: parseFloat(newHumidity.toFixed(1)), status: newHumidity > 85 ? 'warning' : 'normal' },
-          shock: { value: parseFloat(newShock.toFixed(1)), status: newShock > 5 ? 'warning' : newShock > 2 ? 'caution' : 'normal' },
-          battery: { value: parseFloat(newBattery.toFixed(1)), status: newBattery < 20 ? 'warning' : newBattery < 50 ? 'caution' : 'normal' }
-        };
-      });
-    }, 3000);
-    return () => clearInterval(updateInterval);
-  }, [deliveryStatus]);
-
-  const getOptimalRoute = async (start, waypoints, end) => {
+  const getOptimalRoute = async (start, end) => {
     setIsLoading(true);
     try {
-      const waypointsString = waypoints.map(wp => `${wp[0]},${wp[1]}`).join(';');
-      const url = `https://api.mapbox.com/directions/v5/mapbox/driving/${start[0]},${start[1]};${waypointsString ? waypointsString + ';' : ''}${end[0]},${end[1]}?steps=true&geometries=geojson&access_token=${mapboxgl.accessToken}`;
+      const url = `https://api.mapbox.com/directions/v5/mapbox/driving/${start[0]},${start[1]};${end[0]},${end[1]}?geometries=geojson&access_token=${mapboxgl.accessToken}`;
       const response = await fetch(url);
       const data = await response.json();
       if (data.routes && data.routes[0]) {
         return data.routes[0].geometry.coordinates;
       }
-      return [start, ...waypoints, end];
+      return [start, end];
     } catch (error) {
       console.error('Error fetching route:', error);
-      return [start, ...waypoints, end];
+      return [start, end];
     } finally {
       setIsLoading(false);
     }
+  };
+
+  const calculateDistance = (start, end) => {
+    const toRad = (deg) => deg * Math.PI / 180;
+    const R = 6371; // Earth's radius in km
+    const dLat = toRad(end[1] - start[1]);
+    const dLng = toRad(end[0] - start[0]);
+    const a = Math.sin(dLat / 2) * Math.sin(dLat / 2) +
+              Math.cos(toRad(start[1])) * Math.cos(toRad(end[1])) * 
+              Math.sin(dLng / 2) * Math.sin(dLng / 2);
+    const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
+    return R * c;
   };
 
   const fetchBlockchainData = async (rfid) => {
@@ -579,10 +499,10 @@ const RouteMap = () => {
     setDeliveryStatus('in-transit');
     const route = routeData[selectedRoute];
     const allPoints = [route.origin, ...route.via, route.destination];
-    const routeCoordinates = await getOptimalRoute(route.origin, route.via, route.destination);
-
+    const routeCoordinates = route.coordinates;
+  
     socket.current.emit('startDelivery', { routeId: selectedRoute, coordinates: routeCoordinates });
-
+  
     const el = document.createElement('div');
     el.className = 'vehicle-marker';
     el.innerHTML = `
@@ -596,12 +516,13 @@ const RouteMap = () => {
     `;
     vehicleMarkerRef.current = new mapboxgl.Marker(el).setLngLat(routeCoordinates[0]).addTo(map.current);
     deploySensors(allPoints);
-
+  
     let step = 0;
-    const maxSteps = 3000;
-    const hopPoints = [0, ...route.via.map((_, idx) => Math.floor(((idx + 1) / (allPoints.length - 1)) * maxSteps)), maxSteps];
+    const maxSteps = 1000;
+    const hopPoints = [0, Math.floor(maxSteps / 2), maxSteps]; // Origin, Hop, Destination
     const pauseDuration = 3000;
-
+    const updateInterval = 50; // Emit update every 50 steps (adjust as needed)
+  
     const animateMovement = async () => {
       if (step > maxSteps) {
         setCurrentPosition(allPoints.length - 1);
@@ -620,27 +541,34 @@ const RouteMap = () => {
         flyToEyeLevel(route.destination);
         return;
       }
-
+  
       const progress = step / maxSteps;
       const totalRoutePoints = routeCoordinates.length;
       const currentRouteIndex = Math.floor(progress * (totalRoutePoints - 1));
       const nextRouteIndex = Math.min(currentRouteIndex + 1, totalRoutePoints - 1);
       const segmentProgress = (progress * (totalRoutePoints - 1)) % 1;
-
+  
       const startPoint = routeCoordinates[currentRouteIndex];
       const endPoint = routeCoordinates[nextRouteIndex];
       const newLng = startPoint[0] + (endPoint[0] - startPoint[0]) * segmentProgress;
       const newLat = startPoint[1] + (endPoint[1] - startPoint[1]) * segmentProgress;
       const coordinate = [newLng, newLat];
       vehicleMarkerRef.current.setLngLat(coordinate);
-
-      socket.current.emit('locationUpdate', { routeId: selectedRoute, coordinate, position: Math.floor(progress * (allPoints.length - 1)) });
-
+  
+      // Only emit location update every 'updateInterval' steps
+      if (step % updateInterval === 0 || hopPoints.includes(step)) {
+        socket.current.emit('locationUpdate', { 
+          routeId: selectedRoute, 
+          coordinate, 
+          position: Math.floor(progress * (allPoints.length - 1)) 
+        });
+      }
+  
       if (userMarkerRef.current) {
         userMarkerRef.current.setLngLat(coordinate);
         map.current.setCenter(coordinate);
       }
-
+  
       const currentHopIndex = hopPoints.findIndex(hopStep => step === hopStep);
       if (currentHopIndex !== -1 && currentHopIndex < hopPoints.length) {
         el.className = 'vehicle-marker animate-hop';
@@ -648,29 +576,30 @@ const RouteMap = () => {
         setBlockchainData(blockchain);
         const aiResult = await validateWithAI(blockchain);
         setAiValidation(aiResult);
-
+  
         let pauseCount = 0;
         const pauseInterval = setInterval(() => {
           pauseCount += 16;
           if (pauseCount >= pauseDuration) {
             clearInterval(pauseInterval);
             el.className = 'vehicle-marker';
+
             setBlockchainData(null);
             setAiValidation(null);
-            step++;
+            step += 5;
             animationRef.current = requestAnimationFrame(animateMovement);
           }
         }, 16);
         return;
       }
-
+  
       updateSensors(step, maxSteps);
       const hopProgress = hopPoints.findIndex(hop => step <= hop);
       setCurrentPosition(Math.max(0, hopProgress - 1));
       step++;
       animationRef.current = requestAnimationFrame(animateMovement);
     };
-
+  
     animationRef.current = requestAnimationFrame(animateMovement);
   };
 
@@ -760,7 +689,7 @@ const RouteMap = () => {
     sensorsRef.current = [];
     const sensors = [];
     routePoints.forEach((point, idx) => {
-      if (idx > 0 && idx < routePoints.length - 1) {
+      if (idx === 1) { // Only deploy sensors at the hop point
         const offset = 0.005;
         const sensorPoints = [
           [point[0], point[1]],
@@ -796,7 +725,7 @@ const RouteMap = () => {
     const progress = step / maxSteps;
     setActiveSensors(prev => {
       return prev.map((sensor, idx) => {
-        const shouldActivate = Math.random() < 0.1 || (idx / prev.length < progress + 0.1 && idx / prev.length > progress - 0.2);
+        const shouldActivate = progress > 0.45 && progress < 0.55; // Activate near the hop point
         if (shouldActivate && sensor.status === 'idle') {
           sensorsRef.current[idx].getElement().innerHTML = `
             <div class="sensor-${sensor.type.toLowerCase()} w-6 h-6 rounded-full bg-green-700 border border-green-500 flex items-center justify-center text-xs text-white animate-pulse">
@@ -837,96 +766,105 @@ const RouteMap = () => {
     if (!mapInstance || !mapInstance.loaded() || !routeData || !routeData[routeId]) return;
 
     setIsLoading(true);
-    ['route-line', 'route-glow', 'route-arrow', 'route-points'].forEach(layer => {
-      if (mapInstance.getLayer(layer)) mapInstance.removeLayer(layer);
-    });
-    ['route', 'route-glow', 'route-arrow', 'points'].forEach(source => {
-      if (mapInstance.getSource(source)) mapInstance.removeSource(source);
-    });
-    markersRef.current.forEach(marker => marker.remove());
-    markersRef.current = [];
+    try {
+      ['route-line', 'route-glow', 'route-arrow', 'route-points'].forEach(layer => {
+        if (mapInstance.getLayer(layer)) mapInstance.removeLayer(layer);
+      });
+      ['route', 'route-glow', 'route-arrow', 'points'].forEach(source => {
+        if (mapInstance.getSource(source)) mapInstance.removeSource(source);
+      });
+      markersRef.current.forEach(marker => marker.remove());
+      markersRef.current = [];
 
-    const route = routeData[routeId];
-    const routeCoordinates = coordinates || await getOptimalRoute(route.origin, route.via, route.destination);
-    const pointCoordinates = [route.origin, ...route.via, route.destination];
-    const pointLabels = ['Origin', ...route.viaNames.map((name, i) => `Hop ${i + 1}: ${name}`), 'Destination'];
+      const route = routeData[routeId];
+      const routeCoordinates = coordinates || route.coordinates;
+      const pointCoordinates = [route.origin, ...route.via, route.destination];
+      const pointLabels = ['Origin', 'Hop', 'Destination'];
 
-    const bounds = new mapboxgl.LngLatBounds();
-    routeCoordinates.forEach(coord => bounds.extend(coord));
-    mapInstance.fitBounds(bounds, { padding: 80, duration: 1000 });
+      const bounds = new mapboxgl.LngLatBounds();
+      routeCoordinates.forEach(coord => bounds.extend(coord));
+      mapInstance.fitBounds(bounds, { padding: 80, duration: 1000 });
 
-    mapInstance.addSource('route', {
-      type: 'geojson',
-      data: {
-        type: 'Feature',
-        properties: {},
-        geometry: { type: 'LineString', coordinates: routeCoordinates }
-      }
-    });
-    mapInstance.addLayer({
-      id: 'route-glow',
-      type: 'line',
-      source: 'route',
-      layout: { 'line-join': 'round', 'line-cap': 'round' },
-      paint: { 'line-color': '#4d7bef', 'line-width': 8, 'line-opacity': 0.5, 'line-blur': 3 }
-    });
-    mapInstance.addLayer({
-      id: 'route-line',
-      type: 'line',
-      source: 'route',
-      layout: { 'line-join': 'round', 'line-cap': 'round' },
-      paint: { 'line-color': '#3b82f6', 'line-width': 4, 'line-opacity': 0.8 }
-    });
+      mapInstance.addSource('route', {
+        type: 'geojson',
+        data: {
+          type: 'Feature',
+          properties: {},
+          geometry: { type: 'LineString', coordinates: routeCoordinates }
+        }
+      });
+      mapInstance.addLayer({
+        id: 'route-glow',
+        type: 'line',
+        source: 'route',
+        layout: { 'line-join': 'round', 'line-cap': 'round' },
+        paint: { 'line-color': '#4d7bef', 'line-width': 8, 'line-opacity': 0.5, 'line-blur': 3 }
+      });
+      mapInstance.addLayer({
+        id: 'route-line',
+        type: 'line',
+        source: 'route',
+        layout: { 'line-join': 'round', 'line-cap': 'round' },
+        paint: { 'line-color': '#3b82f6', 'line-width': 4, 'line-opacity': 0.8 }
+      });
 
-    pointCoordinates.forEach((coord, index) => {
-      const el = document.createElement('div');
-      el.className = 'custom-marker';
-      const isCompleted = index <= currentPosition;
-      const isOrigin = index === 0;
-      const isDestination = index === pointCoordinates.length - 1;
-      let markerHTML = '';
-      if (isOrigin) {
-        markerHTML = `
-          <div class="relative">
-            <div class="absolute w-14 h-14 bg-blue-500 rounded-full opacity-30 ${isCompleted ? 'animate-ping' : ''}" style="top: -7px; left: -7px;"></div>
-            <div class="w-12 h-12 flex items-center justify-center rounded-full ${isCompleted ? 'bg-green-600' : 'bg-blue-600'} border-2 border-white text-white shadow-lg cursor-pointer">
-              <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" class="w-6 h-6">
-                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6" />
-              </svg>
+      pointCoordinates.forEach((coord, index) => {
+        const el = document.createElement('div');
+        el.className = 'custom-marker';
+        const isCompleted = index <= currentPosition;
+        const isOrigin = index === 0;
+        const isDestination = index === pointCoordinates.length - 1;
+        let markerHTML = '';
+        if (isOrigin) {
+          markerHTML = `
+            <div class="relative">
+              <div class="absolute w-14 h-14 bg-blue-500 rounded-full opacity-30 ${isCompleted ? 'animate-ping' : ''}" style="top: -7px; left: -7px;"></div>
+              <div class="w-12 h-12 flex items-center justify-center rounded-full ${isCompleted ? 'bg-green-600' : 'bg-blue-600'} border-2 border-white text-white shadow-lg cursor-pointer">
+                <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" class="w-6 h-6">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6" />
+                </svg>
+              </div>
+              <div class="mt-2 px-2 py-1 bg-gray-800 text-gray-200 text-xs rounded shadow whitespace-nowrap">${pointLabels[index]}</div>
             </div>
-            <div class="mt-2 px-2 py-1 bg-gray-800 text-gray-200 text-xs rounded shadow whitespace-nowrap">${pointLabels[index]}</div>
-          </div>
-        `;
-      } else if (isDestination) {
-        markerHTML = `
-          <div class="relative">
-            <div class="absolute w-14 h-14 bg-blue-500 rounded-full opacity-30 ${isCompleted ? 'animate-ping' : ''}" style="top: -7px; left: -7px;"></div>
-            <div class="w-12 h-12 flex items-center justify-center rounded-full ${isCompleted ? 'bg-green-600' : 'bg-red-600'} border-2 border-white text-white shadow-lg cursor-pointer">
-              <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" class="w-6 h-6">
-                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z" />
-                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 11a3 3 0 11-6 0 3 3 0 016 0z" />
-              </svg>
+          `;
+        } else if (isDestination) {
+          markerHTML = `
+            <div class="relative">
+              <div class="absolute w-14 h-14 bg-blue-500 rounded-full opacity-30 ${isCompleted ? 'animate-ping' : ''}" style="top: -7px; left: -7px;"></div>
+              <div class="w-12 h-12 flex items-center justify-center rounded-full ${isCompleted ? 'bg-green-600' : 'bg-red-600'} border-2 border-white text-white shadow-lg cursor-pointer">
+                <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" class="w-6 h-6">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z" />
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 11a3 3 0 11-6 0 3 3 0 016 0z" />
+                </svg>
+              </div>
+              <div class="mt-2 px-2 py-1 bg-gray-800 text-gray-200 text-xs rounded shadow whitespace-nowrap">${pointLabels[index]}</div>
             </div>
-            <div class="mt-2 px-2 py-1 bg-gray-800 text-gray-200 text-xs rounded shadow whitespace-nowrap">${pointLabels[index]}</div>
-          </div>
-        `;
-      } else {
-        markerHTML = `
-          <div class="relative">
-            <div class="absolute w-10 h-10 bg-blue-500 rounded-full opacity-30 ${isCompleted ? 'animate-ping' : ''}" style="top: -5px; left: -5px;"></div>
-            <div class="w-8 h-8 flex items-center justify-center rounded-full ${isCompleted ? 'bg-green-600' : 'bg-yellow-600'} border-2 border-white text-white shadow-lg cursor-pointer">${index}</div>
-            <div class="mt-2 px-2 py-1 bg-gray-800 text-gray-200 text-xs rounded shadow whitespace-nowrap">${pointLabels[index]}</div>
-          </div>
-        `;
-      }
-      el.innerHTML = markerHTML;
+          `;
+        } else {
+          markerHTML = `
+            <div class="relative">
+              <div class="absolute w-10 h-10 bg-blue-500 rounded-full opacity-30 ${isCompleted ? 'animate-ping' : ''}" style="top: -5px; left: -5px;"></div>
+              <div class="w-8 h-8 flex items-center justify-center rounded-full ${isCompleted ? 'bg-green-600' : 'bg-yellow-600'} border-2 border-white text-white shadow-lg cursor-pointer">H</div>
+              <div class="mt-2 px-2 py-1 bg-gray-800 text-gray-200 text-xs rounded shadow whitespace-nowrap">${pointLabels[index]}</div>
+            </div>
+          `;
+        }
+        el.innerHTML = markerHTML;
 
-      const marker = new mapboxgl.Marker(el).setLngLat(coord).addTo(mapInstance);
-      el.addEventListener('click', () => flyToEyeLevel(coord));
-      markersRef.current.push(marker);
-    });
-
-    setIsLoading(false);
+        const marker = new mapboxgl.Marker(el).setLngLat(coord).addTo(mapInstance);
+        el.addEventListener('click', () => flyToEyeLevel(coord));
+        markersRef.current.push(marker);
+      });
+    } catch (error) {
+      console.error('Error drawing route:', error);
+      setNotification({
+        type: 'error',
+        message: 'Failed to draw route!',
+        time: new Date().toLocaleTimeString()
+      });
+    } finally {
+      setIsLoading(false);
+    }
   };
 
   useEffect(() => {
@@ -948,9 +886,7 @@ const RouteMap = () => {
     const coords = await geocodeLocation(customOrigin);
     if (coords) {
       setCustomCoords(coords);
-      const params = new URLSearchParams(window.location.search);
-      const dest = params.get('dest') || 'ghatkopar';
-      setSelectedRoute(`custom-to-${dest}`);
+      setSelectedRoute(`${productId}-custom-to-${dest}`);
     }
   };
 
@@ -1008,7 +944,7 @@ const RouteMap = () => {
             </div>
             {routeData && (
               <select
-                value={selectedRoute}
+                value={selectedRoute || ''}
                 onChange={(e) => {
                   setSelectedRoute(e.target.value);
                   setDeliveryStatus('pending');
@@ -1019,6 +955,7 @@ const RouteMap = () => {
                 }}
                 className="w-full p-2 bg-slate-700 text-white rounded border border-slate-600"
               >
+                <option value="" disabled>Select a route</option>
                 {Object.entries(routeData).map(([id, route]) => (
                   <option key={id} value={id}>{route.name}</option>
                 ))}
@@ -1149,7 +1086,7 @@ const RouteMap = () => {
           )}
         </div>
         <div className="w-full lg:w-3/4 bg-slate-800 rounded-lg overflow-hidden border border-slate-700 shadow-xl relative">
-          <div ref={mapContainer} className="w-full h-full" />
+          <div ref={mapContainer} className="w-full h-full min-h-[400px]" />
           {isLoading && (
             <div className="absolute inset-0 bg-slate-900 bg-opacity-70 flex items-center justify-center z-10">
               <div className="text-blue-400 flex items-center flex-col">
@@ -1171,10 +1108,10 @@ const RouteMap = () => {
             <div className="absolute bottom-6 left-6 right-6 bg-slate-800 bg-opacity-90 rounded-lg p-3 border border-slate-700 shadow-lg">
               <div className="flex items-center justify-between mb-2">
                 <span className="text-sm text-gray-400">Delivery Progress</span>
-                <span className="text-sm text-blue-300 font-medium">{Math.round((currentPosition / (routeData[selectedRoute].via.length + 1)) * 100)}%</span>
+                <span className="text-sm text-blue-300 font-medium">{Math.round((currentPosition / 2) * 100)}%</span>
               </div>
               <div className="h-2 bg-slate-700 rounded-full overflow-hidden">
-                <div className="h-full bg-blue-500 rounded-full transition-all duration-500" style={{ width: `${(currentPosition / (routeData[selectedRoute].via.length + 1)) * 100}%` }}></div>
+                <div className="h-full bg-blue-500 rounded-full transition-all duration-500" style={{ width: `${(currentPosition / 2) * 100}%` }}></div>
               </div>
               <div className="mt-2 flex justify-between text-xs text-gray-400">
                 <span>Origin</span>
@@ -1186,17 +1123,10 @@ const RouteMap = () => {
       </div>
 
       <style jsx global>{`
-        @keyframes spin-3d {
-          0% { transform: rotateX(0deg) rotateY(0deg); }
-          50% { transform: rotateX(180deg) rotateY(180deg); }
-          100% { transform: rotateX(360deg) rotateY(360deg); }
-        }
+        @keyframes spin-3d { 0% { transform: rotateX(0deg) rotateY(0deg); } 50% { transform: rotateX(180deg) rotateY(180deg); } 100% { transform: rotateX(360deg) rotateY(360deg); } }
         .animate-spin-3d { animation: spin-3d 3s infinite linear; }
         .animate-fade-in { animation: fade-in 0.3s ease-out forwards; }
-        @keyframes fade-in {
-          0% { opacity: 0; transform: translateY(-10px); }
-          100% { opacity: 1; transform: translateY(0); }
-        }
+        @keyframes fade-in { 0% { opacity: 0; transform: translateY(-10px); } 100% { opacity: 1; transform: translateY(0); } }
         ${crazyStyles}
       `}</style>
     </div>

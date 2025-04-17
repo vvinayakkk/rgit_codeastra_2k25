@@ -21,6 +21,8 @@ import ConsumerDashboard from './pages/ConsumerDashboard'
 import PharmaDashboard from './pages/ConsumerDashboard'
 import ItemImageCompliancePage from './pages/Reports'
 import FraudDetectionPage from './pages/Fraud'
+import SupplyChainDashboard from './pages/dashboard'
+import Camera from './pages/camera'
 
 function App() {
   const [count, setCount] = useState(0)
@@ -48,6 +50,9 @@ function App() {
         <Route path='/consumer' element={<PharmaDashboard />} />
         <Route path='/report' element={<ItemImageCompliancePage />} />
         <Route path='/overall-fraud' element={<FraudDetectionPage />} />
+        <Route path='/journey' element={<SupplyChainDashboard />} />
+        <Route path='/camera' element={<Camera />} />
+        <Route path='/map/:productId/:src/:destination' element={<RouteMap />} />
       </Routes>
     </>
   )

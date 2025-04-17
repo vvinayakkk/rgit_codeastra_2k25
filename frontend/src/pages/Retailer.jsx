@@ -730,11 +730,20 @@ const RetailerDashboard = () => {
 // Transactions History component
 const TransactionHistory = () => (
   <div className="bg-white dark:bg-gray-800 rounded-lg shadow-lg">
-    <div className="p-6 border-b border-gray-200 dark:border-gray-700">
-      <h2 className="text-lg font-semibold flex items-center">
-        <Database className="w-5 h-5 mr-2 text-blue-600" />
-        Blockchain Transaction History
-      </h2>
+    <div className="p-6 border-b border-gray-200 dark:border-gray-700 flex justify-between items-center">
+      <div className="flex items-center space-x-4">
+        <h2 className="text-lg font-semibold flex items-center">
+          <Database className="w-5 h-5 mr-2 text-blue-600" />
+          Blockchain Transaction History
+        </h2>
+        <button
+          onClick={() => navigate('/journey')}
+          className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors duration-200 flex items-center space-x-2"
+        >
+          <Truck className="w-4 h-4" />
+          <span>Journey</span>
+        </button>
+      </div>
     </div>
     
     <div className="overflow-x-auto">
@@ -1088,15 +1097,18 @@ return (
               {activeTab === 'fraud' && 'Fraud Detection System'}
             </h1>
           </div>
-          <div className="flex items-center">
+          <div className="flex items-center space-x-4">
+            <button 
+              className="px-4 py-2 bg-gradient-to-r from-blue-600 to-blue-800 text-white rounded-lg hover:from-blue-700 hover:to-blue-900 transition-all duration-200 ease-in-out flex items-center gap-2 shadow-lg hover:shadow-blue-500/50 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2"
+              onClick={() => navigate('/overall-fraud')}
+            >
+              <ShieldHalf className="w-5 h-5" />
+              <span className="font-medium">Overall Fraud Detection</span>
+            </button>
             <div className="relative">
-              <button className="relative p-2 text-gray-500 hover:text-gray-700 focus:outline-none focus:ring-2 focus:ring-inset focus:ring-blue-500" onClick={navigate('/overall-fraud')}>
-                <ShieldHalf className='w-4 h-4' />
-                Over-All Fraud Deteaction 
-              </button>
               <button 
                 onClick={() => setShowNotifications(!showNotifications)}
-                className="relative p-2 text-gray-500 hover:text-gray-700 focus:outline-none focus:ring-2 focus:ring-inset focus:ring-blue-500"
+                className="p-2 text-gray-500 hover:text-gray-700 focus:outline-none focus:ring-2 focus:ring-inset focus:ring-blue-500"
               >
                 <Bell className="h-6 w-6" />
                 {notifications.filter(n => !n.read).length > 0 && (
@@ -1126,7 +1138,7 @@ return (
                 </div>
               )}
             </div>
-            <div className="ml-4">
+            <div className="border-l border-gray-200 dark:border-gray-700 pl-4">
               <div className="flex items-center">
                 <div className="h-8 w-8 rounded-full bg-blue-100 flex items-center justify-center">
                   <User className="h-5 w-5 text-blue-600" />
