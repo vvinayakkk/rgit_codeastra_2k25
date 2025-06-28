@@ -7,7 +7,7 @@ anushka: 5000
 harshit: 6001
 harshit3: 6002
 
-Below is a comprehensive GitHub README for your project, incorporating all the details you provided, including 5-6 Mermaid diagrams, structured sections, and a professional yet engaging tone. I’ve ensured it captures your problem statement, features, tech stack, workflows, and business value.
+
 
 ---
 
