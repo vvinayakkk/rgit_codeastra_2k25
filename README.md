@@ -1,5 +1,5 @@
 # 📦 Blockchain-Based Supply Chain with AI Fraud Detection
-<img width="512" height="279" alt="image" src="https://github.com/user-attachments/assets/a2829013-76d0-4981-ac0d-0f93167787c0" />
+<img width="1024" height="679" alt="image" src="https://github.com/user-attachments/assets/a2829013-76d0-4981-ac0d-0f93167787c0" />
 
 [](https://www.google.com/search?q=https://github.com/your-username/your-repo/actions)
 [](https://www.google.com/search?q=https://github.com/your-username/your-repo/actions)
