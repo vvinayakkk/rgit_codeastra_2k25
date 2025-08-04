@@ -1,95 +1,138 @@
----
+# 📦 Blockchain-Based Supply Chain with AI Fraud Detection
+<img width="512" height="279" alt="image" src="https://github.com/user-attachments/assets/a2829013-76d0-4981-ac0d-0f93167787c0" />
 
-# Blockchain-Based Supply Chain with AI Fraud Detection
+[](https://www.google.com/search?q=https://github.com/your-username/your-repo/actions)
+[](https://www.google.com/search?q=https://github.com/your-username/your-repo/actions)
+[](https://opensource.org/licenses/MIT)
+[](https://www.python.org/)
+[](https://ethereum.org/)
+[](https://reactjs.org/)
+[](https://flask.palletsprojects.com/)
 
-Welcome to the future of supply chain management! This project delivers a **blockchain-powered supply chain system** integrated with **AI-driven fraud detection** and **optimized logistics**, ensuring transparency, authenticity, and efficiency for businesses worldwide. Built for producers, manufacturers, and retailers, our platform tracks products end-to-end while leveraging cutting-edge AI and blockchain to eliminate fraud and streamline operations.
-![diagram-export-3-18-2025-7_19_06-PM](https://github.com/user-attachments/assets/761c87fc-3984-4dab-b31d-f95adad146de)
+This project delivers a **blockchain-powered supply chain system** integrated with **AI-driven fraud detection** and **optimized logistics**. Our platform ensures transparency, authenticity, and efficiency for businesses by tracking products end-to-end and leveraging cutting-edge AI and blockchain to eliminate fraud and streamline operations.
 
+-----
 
----
+## 📋 Table of Contents
+
+  * [🌟 Project Overview](https://www.google.com/search?q=%23-project-overview)
+  * [🚀 Core Features](https://www.google.com/search?q=%23-core-features)
+      * [1. Rapid Compliance Check](https://www.google.com/search?q=%231-rapid-compliance-check-)
+      * [2. Shortest Route Optimization](https://www.google.com/search?q=%232-shortest-route-optimization-)
+      * [3. Blockchain Security](https://www.google.com/search?q=%233-blockchain-security)
+      * [4. AI-Powered Surveillance & Fraud Detection](https://www.google.com/search?q=%234-ai-powered-surveillance--fraud-detection)
+  * [🎨 Architecture & Workflow](https://www.google.com/search?q=%23-architecture--workflow)
+  * [🛠️ Tech Stack](https://www.google.com/search?q=%23%EF%B8%8F-tech-stack)
+  * [📈 Why This Project Matters](https://www.google.com/search?q=%23-why-this-project-matters)
+  * [💼 Monetization Strategy](https://www.google.com/search?q=%23-monetization-strategy)
+  * [⚙️ Getting Started](https://www.google.com/search?q=%23%EF%B8%8F-getting-started)
+  * [🤝 Contributing](https://www.google.com/search?q=%23-contributing)
+  * [📜 License](https://www.google.com/search?q=%23-license)
+
+-----
 
 ## 🌟 Project Overview
 
-Imagine a world where supply chains are transparent, fraud-free, and optimized for speed, cost, and sustainability. Our solution combines **Ethereum blockchain**, **IPFS for decentralized storage**, and **AI-powered compliance and fraud detection** to create a robust, scalable platform. Whether you're a producer listing goods, a manufacturer ensuring compliance, or a retailer receiving authentic products, this system has you covered.
+The global supply chain industry loses billions annually to fraud and inefficiencies. Our solution combines **Ethereum blockchain**, **IPFS for decentralized storage**, and **AI-powered compliance and fraud detection** to create a robust, scalable platform.
 
-### Problem Statement
-Build a blockchain-powered supply chain management system that:
-- Tracks product authenticity.
-- Uses AI to detect fraudulent transactions.
-- Ensures transparency across producers, manufacturers, and retailers.
+This system addresses key industry challenges by:
 
----
+  * **Tracking product authenticity** through an immutable, decentralized ledger.
+  * **Leveraging AI** to proactively detect and prevent fraudulent transactions.
+  * **Ensuring transparency** for all stakeholders—producers, manufacturers, and retailers.
+
+-----
 
 ## 🚀 Core Features
 
-### 1. Supply Chain Management Website & React Native App
-- A full-fledged platform for **producers**, **manufacturers**, and **retailers**.
-- List products, track deliveries, and manage workflows seamlessly.
-- Available as a **web app (Flask + React)** and **mobile app (React Native)**.
+### 1\. Rapid Compliance Check (Star Feature 🔥)
 
-### 2. Rapid Compliance Check (Star Feature 🔥)
-Imagine seamless international shipments with zero compliance guesswork. Our AI-powered Rapid Compliance Checker automates and simplifies compliance, ensuring accuracy and regulatory adherence.
+Our AI-powered Rapid Compliance Checker automates and simplifies the complex process of international shipping, ensuring accuracy and regulatory adherence.
 
-- **Real-Time Compliance Knowledge Base**
-  - Sources: Government portals, FedEx, UPS, international regulations.
-  - Graph RAG Model: AI-driven retrieval of country-specific rules.
-  - Interactive Chatbot: Memory-enabled compliance queries.
-- **AI-Powered Prohibited Item Checker**
-  - Country-wise restricted item checks.
-  - Item-based ban list search.
-  - Export options: PDF, CSV, WhatsApp, SMS.
-- **Image-Based Compliance Analysis**
-  - YOLOv11 OBB model (99.2% accuracy) detects items from uploaded images.
-  - Dynamic country-wise ban reports with graphical insights.
-- **Bulk Shipment Compliance & Admin Panel**
-  - CSV upload for bulk analysis.
-  - Admin controls for dynamic rule updates.
-  - Microservices architecture for parallel processing.
-- **AI Agents & Automated Reports**
-  - Real-time scraping of 22+ FedEx rules.
-  - Reinforcement learning for self-improving insights.
-  - AI-generated compliance emails.
-- **Multilingual Support**
-  - French, Spanish, Chinese, Hindi, and more.
-  - WhatsApp, SMS, and email integration.
+  * **Real-Time Compliance Knowledge Base:** A **Graph RAG Model** continuously scrapes and retrieves real-time regulatory information from government portals, shipping companies (FedEx, UPS), and other international bodies.
+  * **AI-Powered Prohibited Item Checker:** A fine-tuned **YOLOv11 OBB model** (99.2% accuracy) detects items from uploaded images, flagging country-specific restricted or banned goods.
+  * **Bulk Analysis & Automation:** Users can upload a CSV for bulk analysis of shipments. The system then generates compliance reports and sends automated AI-powered alerts via email or WhatsApp.
+  * **Multilingual Support:** The platform supports multiple languages (French, Spanish, Chinese, Hindi) to cater to global businesses.
 
-### 3. Shortest Route Optimization (Star Feature 🎯)
-A node-based graph model optimizes product delivery routes, balancing cost, time, emissions, and logistics scores.
+<!-- end list -->
 
-- **Objectives**
-  - Gather clean transport data.
-  - Optimize cross-border routes.
-  - Provide a user-friendly route mapping interface.
-- **Data Sources**
-  - 71 seaports, 105 airports, 1932 sea routes, 10,920 air routes.
-  - WTO customs scores, World Bank logistics data, Freightos FBX Index.
-- **Graph-Based Modeling**
-  - NetworkX-powered fully connected logistics network.
-  - Multi-objective A* search algorithm for route optimization.
-- **Features**
-  - Ranked routes with cost, time, and emissions metrics.
-  - Google Maps API integration.
-  - Eco-friendly and perishable goods routing options.
+```mermaid
+graph TD
+    A[User Uploads Product Data] --> B{Regulatory Check};
+    B -- Data.JSON --> C[Store on IPFS]
+    B -- Hash --> D[Record on Blockchain]
+    B -- Fail --> E[Generate Compliance Report & AI Alert]
+    B -- Pass --> F[Proceed to Logistics]
+    subgraph AI Compliance Pipeline
+        G[Graph RAG Model] --> H[Real-time Regulations]
+        I[YOLOv11 OBB Model] --> J[Prohibited Item Check]
+        H & J --> B
+    end
+```
 
-### 4. Blockchain Security
-- **Ethereum Blockchain**: Securely stores all transactions and product data.
-- **IPFS (Pinata)**: Decentralized storage for `data.json` files.
-- **Smart Contracts**: Written with Truffle and tested locally via Ganache to prevent fraud at every step.
+### 2\. Shortest Route Optimization (Star Feature 🎯)
 
-### 5. AI-Powered Surveillance & Fraud Detection
+This feature optimizes product delivery routes by balancing multiple objectives like cost, time, and sustainability.
+
+  * **Graph-Based Modeling:** A logistics network is built using **NetworkX**, which incorporates data from 71 seaports, 105 airports, and thousands of global routes.
+  * **Multi-Objective A\* Search:** The algorithm analyzes transport data, WTO customs scores, and World Bank logistics data to provide a ranked list of optimal routes.
+  * **Smart Routing:** The system can suggest eco-friendly routes or prioritize faster routes for perishable goods. Route maps are displayed via **Google Maps API** integration.
+
+<!-- end list -->
+
+```mermaid
+graph TD
+    A[Collect Logistics Data] --> B[Build Graph with NetworkX]
+    B --> C[Multi-Objective A* Search]
+    C --> D[Rank Routes by Cost, Time, Emissions]
+    D --> E[Display on Google Maps UI]
+```
+
+### 3\. Blockchain Security
+
+  * **Ethereum Blockchain:** All transactions and product data are recorded on the Ethereum blockchain, creating an immutable and transparent ledger.
+  * **IPFS (Pinata):** Product data files (`data.json`) are stored on the InterPlanetary File System, with only the unique, tamper-proof hash stored on the blockchain, saving on gas fees while ensuring data integrity.
+  * **Smart Contracts:** Developed with **Truffle** and tested on **Ganache**, these contracts automate the transfer of goods and verify transactions to prevent fraud.
+
+<!-- end list -->
+
+```mermaid
+graph TD
+    A[Product Data] --> B[Store JSON on IPFS via Pinata]
+    B --> C[Generate IPFS Hash]
+    C --> D[Smart Contract on Ethereum]
+    D -- Hash + Tx Data --> E[Immutable Record on Blockchain]
+```
+
+### 4\. AI-Powered Surveillance & Fraud Detection
+
 An additional security layer using advanced computer vision and reinforcement learning.
 
-- **Semantic Segmentation**: Mask-RCNN identifies objects in surveillance footage.
-- **Classification**: Swin Transformer classifies potential fraud.
-- **Object Detection**: Fine-tuned YOLOv11 OBB detects fraudulent activities.
-- **AI Alerts**: Fraud notifications sent via email and WhatsApp.
-- **Reinforcement Learning**: Cron job at 12 AM learns behavioral patterns for proactive fraud prevention.
+  * **Multi-Model Analysis:** The system uses a combination of models to identify fraudulent activities:
+      * **Semantic Segmentation (Mask-RCNN):** Identifies objects in surveillance footage.
+      * **Classification (Swin Transformer):** Classifies potential fraudulent activities or anomalies.
+      * **Object Detection (YOLOv11 OBB):** Detects specific fraudulent activities with high precision.
+  * **Proactive Prevention:** A reinforcement learning model, run nightly, learns behavioral patterns to proactively identify and prevent future fraud attempts.
+  * **Real-time Alerts:** The system sends immediate fraud notifications via email and WhatsApp.
 
----
+<!-- end list -->
 
-## 🎨 Workflow
+```mermaid
+graph TD
+    A[Load Fraud Dataset] --> B[Preprocess Data]
+    B --> C[Feature Engineering]
+    C --> D[SMOTE Balancing]
+    D --> E[Train Models: RF, GB, XGBoost, NN]
+    E --> F[GridSearchCV Fine-Tuning]
+    F --> G[Evaluate AUC & Metrics]
+    G --> H[Save Pipeline]
+```
 
-Here’s how it all ties together:
+-----
+
+## 🎨 Architecture & Workflow
+
+### End-to-End Supply Chain Flow
 
 ```mermaid
 graph TD
@@ -103,128 +146,127 @@ graph TD
     H --> I[Reinforcement Learning at 12 AM]
 ```
 
----
-
-## 🌟 Distinguishing Features
-
-- **Rapid Compliance Check**: AI-driven, real-time compliance with 99.2% accuracy.
-- **Route Optimization**: Balances cost, time, and sustainability dynamically.
-- **Blockchain + IPFS**: Tamper-proof, decentralized data storage.
-- **AI Surveillance**: Multi-model fraud detection (Mask-RCNN, Swin Transformer, YOLOv11 OBB).
-- **Multilingual & Accessible**: Supports global businesses with WhatsApp/SMS integration.
-
----
+-----
 
 ## 🛠️ Tech Stack
 
 ```mermaid
 graph TD
-    A[Frontend] --> B[React]
-    A --> C[React Native]
-    D[Backend] --> E[Flask]
-    F[Blockchain] --> G[Ethereum]
-    F --> H[IPFS - Pinata]
-    F --> I[Truffle + Ganache]
-    J[AI/ML] --> K[Scikit-learn, XGBoost, SMOTE]
-    J --> L[YOLOv11 OBB, Mask-RCNN, Swin Transformer]
-    M[Data] --> N[NetworkX, Graph RAG]
-    M --> O[Google Maps API, Freightos FBX]
+    A[Frontend] --> B(React / React Native);
+    A --> C(Web / Mobile);
+
+    D[Backend] --> E(Flask REST API);
+    E --> F(Python Microservices);
+
+    G[Blockchain] --> H(Ethereum);
+    H --> I(Smart Contracts);
+    I --> J(Truffle / Ganache);
+    H --> K(IPFS);
+
+    L[AI/ML] --> M(Computer Vision);
+    M --> N(YOLOv11, Mask-RCNN, Swin);
+    L --> O(ML Models);
+    O --> P(XGBoost, RF, NN);
+    O --> Q(Scikit-learn, SMOTE);
+    L --> R(NLP);
+    R --> S(Graph RAG);
+
+    T[Data & APIs] --> U(NetworkX);
+    T --> V(Google Maps API);
+    T --> W(Freightos FBX);
 ```
 
-- **Frontend**: React (web), React Native (mobile)
-- **Backend**: Flask
-- **Blockchain**: Ethereum, IPFS (Pinata), Truffle, Ganache
-- **AI/ML**: Scikit-learn, XGBoost, SMOTE, YOLOv11 OBB, Mask-RCNN, Swin Transformer
-- **Data Processing**: NetworkX, Graph RAG, Pandas, NumPy
-- **APIs**: Google Maps, Freightos FBX, WTO, World Bank
+-----
 
----
+## 📈 Why This Project Matters
 
-## 📈 Feasibility & Viability
+**Feasibility:** Built with mature technologies and scalable AI models, the project is technically sound. It leverages open-source logistics data and microservices to ensure performance at scale.
 
-### Feasibility
-- **Technical**: Built with mature technologies (Ethereum, Flask, React) and scalable AI models.
-- **Data Availability**: Leverages open-source logistics data and real-time APIs.
-- **Scalability**: Microservices and parallel processing ensure performance at scale.
+**Viability:** The solution addresses a critical market need by combating supply chain fraud and inefficiency. By automating compliance and route optimization, it offers significant cost savings and aligns with global sustainability initiatives.
 
-### Viability
-- **Market Need**: Businesses lose billions to supply chain fraud annually—our solution addresses this.
-- **Cost-Effectiveness**: Automates compliance and routing, reducing manual overhead.
-- **Sustainability**: Eco-friendly routing aligns with global green initiatives.
+**Unique Selling Proposition (USP):**
 
----
+  * End-to-end transparency with AI-driven fraud prevention.
+  * Seamless compliance and logistics optimization in a single platform.
+  * Mobile and web accessibility for all stakeholders.
 
-## 💼 Business Model
+-----
 
-### How It’s Useful for Businesses
-- **Producers**: Prove product authenticity and track shipments.
-- **Manufacturers**: Ensure compliance and optimize logistics.
-- **Retailers**: Receive verified goods faster and cheaper.
-- **Global Reach**: Multilingual support for international trade.
-
-### Revenue Streams
-1. **Subscription**: Monthly fees for premium features (bulk compliance, advanced analytics).
-2. **Transaction Fees**: Per shipment tracked on the blockchain.
-3. **Consulting**: Custom compliance and logistics solutions for enterprises.
-
-### Unique Selling Proposition (USP)
-- End-to-end transparency with AI-driven fraud prevention.
-- Seamless compliance and logistics optimization in one platform.
-- Mobile and web accessibility for all stakeholders.
-
----
-
-## ⚙️ AI Fraud Detection Model
-
-Our AI model detects fraudulent transactions with high accuracy. Here’s the pipeline:
+## 💼 Monetization Strategy
 
 ```mermaid
 graph TD
-    A[Load Dataset] --> B[Preprocess Data]
-    B --> C[Feature Engineering]
-    C --> D[SMOTE Balancing]
-    D --> E[Train Models: RF, GB, XGBoost, NN]
-    E --> F[GridSearchCV Fine-Tuning]
-    F --> G[Evaluate AUC & Metrics]
-    G --> H[Save Pipeline]
+    A[Core Platform] --> B[Tiered Subscription Fees]
+    B --> C[Free Tier: Basic Features]
+    B --> D[Pro Tier: Bulk Analysis & Advanced Analytics]
+    B --> E[Enterprise Tier: Custom Solutions & Consulting]
+    A --> F[Transaction Fees: Small fee per shipment]
+    F --> G[Monetize Blockchain Transactions]
 ```
 
-- **Code**: See `ai_fraud_detection.py` for the full implementation.
-- **Models**: Random Forest, Gradient Boosting, XGBoost, Neural Network.
-- **Metrics**: AUC, precision, recall, confusion matrix.
+-----
 
----
-
-## 🌍 Route Optimization Workflow
-
-```mermaid
-graph TD
-    A[Collect Logistics Data] --> B[Build Graph with NetworkX]
-    B --> C[Multi-Objective A* Search]
-    C --> D[Rank Routes by Cost, Time, Emissions]
-    D --> E[Display on Google Maps UI]
-```
-
----
-
-## 🔒 Blockchain Integration
-
-```mermaid
-graph TD
-    A[Product Data] --> B[Smart Contract on Ethereum]
-    B --> C[Store JSON on IPFS via Pinata]
-    C --> D[Hash Stored on Blockchain]
-    D --> E[Immutable Record]
-```
-
----
-
-## 📲 Getting Started
+## ⚙️ Getting Started
 
 ### Prerequisites
-- Python 3.8+
-- Node.js
-- Truffle & Ganache
-- Ethereum wallet (e.g., MetaMask)
-- Pinata API key
 
+  * Python 3.8+
+  * Node.js
+  * Truffle & Ganache
+  * Ethereum wallet (e.g., MetaMask)
+  * Pinata API key
+
+### Installation
+
+1.  **Clone the repository:**
+
+    ```bash
+    git clone https://github.com/your-username/blockchain-supply-chain.git
+    cd blockchain-supply-chain
+    ```
+
+2.  **Set up the backend:**
+
+    ```bash
+    pip install -r requirements.txt
+    python app.py
+    ```
+
+3.  **Set up the web frontend:**
+
+    ```bash
+    cd web-app
+    npm install
+    npm start
+    ```
+
+4.  **Set up the mobile app:**
+
+    ```bash
+    cd mobile-app
+    npm install
+    npx react-native run-android # or run-ios
+    ```
+
+5.  **Blockchain setup:**
+
+      * Install Ganache and Truffle.
+      * Navigate to the `blockchain/` directory and follow the instructions to compile, migrate, and deploy the smart contracts.
+
+6.  **Configuration:**
+
+      * Add your Pinata API key and Google Maps API key to the relevant configuration files.
+
+For detailed instructions, refer to the `docs/` folder.
+
+-----
+
+## 🤝 Contributing
+
+We welcome contributions\! Please feel free to open a pull request or submit an issue on this repository.
+
+-----
+
+## 📜 License
+
+This project is licensed under the MIT License. See the `LICENSE` file for details.
